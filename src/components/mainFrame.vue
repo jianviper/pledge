@@ -1,6 +1,7 @@
 <template>
   <el-container>
     <el-header>
+<!--      顶部栏-->
       <Header/>
     </el-header>
     <el-container>
@@ -8,7 +9,8 @@
         <Aside/>
       </el-aside>
       <el-main>
-        Main
+        <!--        标签页-->
+        <TabPane/>
       </el-main>
     </el-container>
   </el-container>
@@ -17,29 +19,37 @@
 <script>
   import Header from './frame/header'
   import Aside from './frame/aside'
+  import TabPane from './main/tabPane'
 
   export default {
     name: "mainFrame",
-    components: {Aside, Header}
+    components: {TabPane, Aside, Header},
+    data() {
+      return {}
+    },
+    methods: {}
   }
 </script>
 
 <style scoped>
+  .el-container {
+    height: 100vh;
+  }
+
   .el-header {
     background-color: #409EFF;
     color: #333;
     text-align: center;
-    height: 40px;
+    height: 40px !important;
     line-height: 40px;
   }
 
   .el-aside {
-    height: 100vh;
     background-color: #222e3c;
     color: #333;
     text-align: center;
     overflow: scroll;
-
+    margin-top: 20px;
   }
 
   ::-webkit-scrollbar {
@@ -48,9 +58,7 @@
   }
 
   .el-main {
-    background-color: #E9EEF3;
-    color: #333;
     text-align: center;
-    line-height: 160px;
+    padding: 0;
   }
 </style>

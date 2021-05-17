@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <h1 class="logo">后台管理系统</h1>
+    <router-link to="/mainf/wel" class="home"><h1 @click="addTab" class="logo">后台管理系统</h1></router-link>
     <div class="header_tool">
       <el-popover popper-class="popv"
                   placement="bottom"
@@ -25,13 +25,21 @@
       logout() {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('menuData');
+        this.$store.commit('clearTab');
         this.$router.replace('/');
-      }
+      },
+      addTab(key) {
+        this.$store.commit('addTab', {title: '首页', ref: '/mainf/wel'});
+      },
     }
   }
 </script>
 
 <style>
+  .home {
+    text-decoration: none;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;

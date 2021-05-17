@@ -84,7 +84,7 @@
               sessionStorage.setItem('token', token);
               sessionStorage.setItem('menuData', JSON.stringify(response.data.data.menuDtoList));
               // this.$store.commit('updateMenuData', response.data.data.menuDtoList);
-              this.$router.replace('/mainf');
+              this.$router.replace('/mainf/wel');
             })
           } else {
             return false;

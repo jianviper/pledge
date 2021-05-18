@@ -18,7 +18,7 @@ const mutations = {
   },
   // 单击导航栏时添加标签页
   addTab(state, data) {
-    console.log(state.tabsItem);
+    // console.log(state.tabsItem);
     let flag = 0;
     state.tabsItem.map((value) => {
       if (value.ref === data.ref) {

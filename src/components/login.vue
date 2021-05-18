@@ -44,7 +44,7 @@
         }
       }
       return {
-        login_data: {},
+        login_data: {phone: '18600000000', smsCode: '000000'},
         industry_options: [],
         rules: {
           industry: {required: true, message: '请选择行业', trigger: 'change'},
@@ -61,21 +61,21 @@
       get_industry() { //获取行业信息
         this.$axios.post('webLogin/smsCode', {"phone": "18600000000", "smsCode": "000000"}).then((response) => {
           let industry_json = response.data.data.industryMap;
-          console.log(industry_json);
+          // console.log(industry_json);
           for (var i in industry_json) {
             this.industry_options.push({label: industry_json[i], value: i});
           }
-          console.log(this.industry_options);
+          // console.log(this.industry_options);
         })
       },
       select_industry(value) {
         this.login_data.industry = value;
-        console.log(this.login_data);
+        // console.log(this.login_data);
       },
       login() {
         this.$refs['loginForm'].validate((valid) => {
           if (valid) {
-            console.log(this.login_data);
+            // console.log(this.login_data);
             this.$axios.post('webLogin/industry', {
               "phone": this.login_data.phone, "smsCode": this.login_data.smsCode, "industry": this.login_data.industry
             }).then((response) => {

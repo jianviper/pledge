@@ -32,7 +32,7 @@
         console.log(key.$el.innerHTML.trim(), keyPath);
       },
       addTab(key) {
-        console.log(key.index, key.$el.innerHTML.trim());
+        // console.log(key.index, key.$el.innerHTML.trim());
         this.$store.commit('addTab', {title: key.$el.innerHTML.trim(), ref: '/mainf/' + key.index});
       },
       setMenuData() {

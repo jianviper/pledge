@@ -6,7 +6,8 @@ import {Message} from 'element-ui';
 //1. 创建新的axios实例，
 const service = axios.create({
   // 公共接口--这里注意后面会讲
-  baseURL: 'http://www.dongchanzhiya.com:8100',
+  // baseURL: 'http://www.dongchanzhiya.com:8100',
+  baseURL: '/api',
   // 超时时间 单位是ms，这里设置了7s的超时时间
   timeout: 7 * 1000,
 })
@@ -18,7 +19,7 @@ service.interceptors.request.use(config => {
   }
   config.headers = {
     'Content-Type': 'application/json', //配置请求头
-    'Authorization':'',//配置token
+    'Authorization': '',//配置token
   }
   //注意使用token的时候需要引入cookie方法或者用本地localStorage等方法，推荐js-cookie
   const token = sessionStorage.getItem('token');//这里取token之前，你肯定需要先拿到token,存一下

@@ -6,6 +6,7 @@ import Mainf from '@/components/mainFrame'
 import Test from '@/components/test'
 import managementListJXSB from '@/components/main/managementListJXSB'
 import regulatoryListJXSB from '@/components/main/regulatoryListJXSB'
+import repoListJXSB from '@/components/main/repoListJXSB'
 
 Vue.use(Router)
 
@@ -39,6 +40,11 @@ export default new Router({
           name: 'regulatoryListJXSB',
           component: regulatoryListJXSB
         },
+        {
+          path:'repoListJXSB',
+          name:'repoListJXSB',
+          component:repoListJXSB
+        }
       ]
     },
   ]

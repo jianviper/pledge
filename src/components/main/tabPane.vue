@@ -16,7 +16,6 @@
 </template>
 
 <script>
-  import wel from '../HelloWorld'
 
   export default {
     name: "tabPane",
@@ -30,8 +29,14 @@
         * 通过当前选中tabs的实例获得当前实例的path 重新定位路由
         * */
         let val = this.tabsItem.filter(item => thisTab.name == item.ref);
+        if (thisTab.label == '首页') {
+          sessionStorage.removeItem('currentTab');
+        } else {
+          sessionStorage.setItem('currentTab', JSON.stringify({title: thisTab.label, ref: this.name}));
+        }
       },
       removeTab(targetName) { // 关闭便签页
+        // console.log(targetName);
         let tabs = this.tabsItem;
         let activeIndex = this.activeIndex;
         if (activeIndex === targetName) {
@@ -47,7 +52,22 @@
 
         this.activeIndex = activeIndex;
         this.tabsItem = tabs.filter((tab) => tab.ref !== targetName);
+        if (JSON.parse(sessionStorage.getItem('currentTab')).ref == targetName) {
+          sessionStorage.removeItem('currentTab');
+        }
       },
+      initTab() { //如果是刷新，加载的时候初始化刷新前的tab页
+        console.log('tab', new Date().getTime());
+        if (sessionStorage.getItem('currentTab')) {
+          console.log(sessionStorage.getItem('currentTab'));
+          console.log(this.$route);
+          this.$store.commit('addTab', {
+            title: JSON.parse(sessionStorage.getItem('currentTab')).title,
+            ref: this.$route.path
+          });
+          this.activeIndex = this.$route.path;
+        }
+      }
     },
     computed: {
       tabsItem: {
@@ -69,6 +89,9 @@
         }
       }
     },
+    mounted() {
+      this.initTab();
+    }
   }
 </script>
 

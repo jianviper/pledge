@@ -21,6 +21,7 @@ const mutations = {
     // console.log(state.tabsItem);
     let flag = 0;
     state.tabsItem.map((value) => {
+      console.log('vuex',value);
       if (value.ref === data.ref) {
         flag += 1;
       }

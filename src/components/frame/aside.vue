@@ -34,6 +34,10 @@
       addTab(key) {
         // console.log(key.index, key.$el.innerHTML.trim());
         this.$store.commit('addTab', {title: key.$el.innerHTML.trim(), ref: '/mainf/' + key.index});
+        sessionStorage.setItem('currentTab', JSON.stringify({
+          title: key.$el.innerHTML.trim(),
+          ref: '/mainf/' + key.index
+        }));
       },
       setMenuData() {
         // this.menuData = this.$store.getters.getMenu.menuData.reverse();
@@ -44,7 +48,7 @@
         this.menuData = md;
       },
       get_routePath() {
-        // console.log('this.router', this.$route.path);
+        // console.log('this.route', this.$route.path);
         return this.$route.path.split('/mainf/')[1];
       }
     },

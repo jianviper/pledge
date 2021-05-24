@@ -99,7 +99,7 @@
 </template>
 
 <script>
-  import Pager from '../tools/Pager'
+  import Pager from '../../tools/Pager'
 
   export default {
     name: "managementListJXSB",
@@ -219,10 +219,6 @@
 
   .el-table {
     margin: 20px;
-  }
-
-  .block {
-    margin-left: 20px;
   }
 
   .addForm .el-form-item {

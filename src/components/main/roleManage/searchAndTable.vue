@@ -4,13 +4,17 @@
       <el-col :span="6">
         <el-col :span="6"><label for="name">机构名称</label></el-col>
         <el-col :span="16">
-          <el-input id="name" placeholder="模糊匹配" v-model="name"></el-input>
+          <el-input id="name" placeholder="模糊匹配" v-model="name">
+            <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
+          </el-input>
         </el-col>
       </el-col>
       <el-col :span="6">
         <el-col :span="6"><label for="code">机构代码</label></el-col>
         <el-col :span="16">
-          <el-input id="code" placeholder="机构代码" v-model="code"></el-input>
+          <el-input id="code" placeholder="机构代码" v-model="code">
+            <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
+          </el-input>
         </el-col>
       </el-col>
       <el-col :span="6">
@@ -64,7 +68,7 @@
       </el-table-column>
     </el-table>
     <!--  分页器-->
-    <Pager :dataList="tableData" @returnsliceData="accpetSliceData"></Pager>
+    <Pager :dataList="tableData" :currentPage="currentPage" @returnsliceData="accpetSliceData"></Pager>
   </div>
 </template>
 
@@ -102,6 +106,7 @@
           agencyNumber: this.code,
           state: this.statusValue
         }).then((response) => {
+          this.currentPage = 1;
           this.tableData = response.data.data.records;
         })
       },
@@ -120,6 +125,16 @@
         console.log(index, rowData);
         this.$emit('returnRowData', {data: JSON.parse(JSON.stringify(rowData)), dialogVisible: true, addflag: false})
       },
+      iconClick(ev) {
+        let id = ev.path[3].getElementsByTagName('input')[0].id;
+        console.log(ev, id);
+        if (id === 'name') {
+          this.name = '';
+        } else if (id === 'code') {
+          this.code = '';
+        }
+
+      },
     },
     mounted() {
       this.getAgencyData();
@@ -131,6 +146,7 @@
   label {
     line-height: 40px;
   }
+
   .select_wrap {
     text-align: left;
   }
@@ -145,5 +161,9 @@
 
   .block {
     margin-left: 20px;
+  }
+
+  .del {
+    line-height: 40px;
   }
 </style>

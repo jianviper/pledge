@@ -3,13 +3,25 @@ import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import login from "@/components/login"
 import Mainf from '@/components/mainFrame'
-import Test from '@/components/test'
-import managementListJXSB from '@/components/main/managementListJXSB'
-import regulatoryListJXSB from '@/components/main/regulatoryListJXSB'
-import repoListJXSB from '@/components/main/repoListJXSB'
+// import managementListJXSB from '@/components/main/roleManage/managementListJXSB'
+// import regulatoryListJXSB from '@/components/main/roleManage/regulatoryListJXSB'
+// import repoListJXSB from '@/components/main/roleManage/repoListJXSB'
 
 Vue.use(Router)
 
+let router = require.context("../components", true, /\.route\.js/);
+let arr = [];
+router.keys().forEach((key) => {
+  arr = arr.concat(router(key).default); // 拼接数组
+});
+arr.push(
+  {
+    path: 'wel',
+    name: 'wel',
+    component: HelloWorld
+  },
+);
+console.log('index.router', arr);
 export default new Router({
   routes: [
     {
@@ -25,26 +37,27 @@ export default new Router({
       },
       component: Mainf,
       children: [
-        {
-          path: 'wel',
-          name: 'wel',
-          component: HelloWorld
-        },
-        {
-          path: 'managementListJXSB',
-          name: 'managementListJXSB',
-          component: managementListJXSB
-        },
-        {
-          path: 'regulatoryListJXSB',
-          name: 'regulatoryListJXSB',
-          component: regulatoryListJXSB
-        },
-        {
-          path:'repoListJXSB',
-          name:'repoListJXSB',
-          component:repoListJXSB
-        }
+        ...arr
+        // {
+        //   path: 'wel',
+        //   name: 'wel',
+        //   component: HelloWorld
+        // },
+        // {
+        //   path: 'managementListJXSB',
+        //   name: 'managementListJXSB',
+        //   component: managementListJXSB
+        // },
+        // {
+        //   path: 'regulatoryListJXSB',
+        //   name: 'regulatoryListJXSB',
+        //   component: regulatoryListJXSB
+        // },
+        // {
+        //   path: 'repoListJXSB',
+        //   name: 'repoListJXSB',
+        //   component: repoListJXSB
+        // }
       ]
     },
   ]

@@ -17,6 +17,12 @@
         <el-form-item label="机构全称">
           <el-input v-model="agencyFormData.agencyFull"></el-input>
         </el-form-item>
+        <el-form-item label="支持产业">
+          <el-select v-model="agencyFormData.industry" placeholder="请选择行业" @change="select_industry" style="width: 100%">
+            <el-option v-for="item in industry_options" :key="item.value" :value="item.value" :label="item.label">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="机构状态">
           <el-radio-group v-model="agencyFormData.state" @change="statusChange">
             <el-radio :label='0'>正常</el-radio>
@@ -33,18 +39,19 @@
 </template>
 
 <script>
-  import searchAndTable from './roleManage/searchAndTable'
+  import searchAndTable from './searchAndTable'
 
   export default {
-    name: "regulatoryListJXSB",
+    name: "repoListJXSB",
     components: {
       searchAndTable
     },
     data() {
       return {
         addflag: true,
-        lurl: 'baseInfo/agency/supervisorList',
+        lurl: 'baseInfo/agency/storageList',
         timer: '',
+        industry_options: [{label: '汽车', value: 0}, {label: '机械设备', value: 1}],
         dialogVisible: false,
         agencyFormData: {agencyNumber: '', sorting: '', agencyAbbreviation: '', agencyFull: '', state: 0}, //添加资方数据
         rules: {
@@ -69,7 +76,6 @@
     },
     methods: {
       acceptRowData(data) {
-        console.log(data);
         this.dialogVisible = data.dialogVisible;
         this.agencyFormData = data.data;
       },
@@ -77,7 +83,7 @@
         console.log('submit', this.agencyFormData);
         this.$refs['agencyFormData'].validate((valid) => {
           if (valid) {
-            this.$axios.post('baseInfo/agency/saveSupervisor', this.agencyFormData).then((response) => {
+            this.$axios.post('baseInfo/agency/saveStorage', this.agencyFormData).then((response) => {
               // console.log(response.data);
               if (response.data.code === 200) {
                 this.dialogVisible = false;
@@ -89,8 +95,7 @@
           } else {
             return false;
           }
-        });
-        this.addflag = true;
+        })
       },
       statusChange(value) {
         this.agencyFormData.state = value;
@@ -98,7 +103,6 @@
       cancel() {
         this.dialogVisible = false;
         this.$refs['agencyFormData'].resetFields();
-        console.log(this.ZFTableData, this.sliceData);
       },
       close_dialog() {
         this.$refs['agencyFormData'].resetFields();

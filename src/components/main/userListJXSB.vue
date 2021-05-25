@@ -12,15 +12,15 @@
       <el-col :span="8">
         <el-col :span="8"><label for="mobile">手机</label></el-col>
         <el-col :span="16">
-          <el-input id="mobile" placeholder="请输入手机号" v-model="name">
+          <el-input id="mobile" placeholder="请输入手机号" v-model="mobile">
             <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
           </el-input>
         </el-col>
       </el-col>
       <el-col :span="8">
-        <el-col :span="8"><label for="name">所属机构</label></el-col>
+        <el-col :span="8"><label for="agency">所属机构</label></el-col>
         <el-col :span="16">
-          <el-input id="name" placeholder="请输入姓名" v-model="name">
+          <el-input id="agency" placeholder="请输入姓名" v-model="agency">
             <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
           </el-input>
         </el-col>

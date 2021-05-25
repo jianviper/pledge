@@ -2,7 +2,7 @@
   <div>
     <searchAndTable :listUrl="lurl" @returnRowData="acceptRowData" :key="timer"/>
     <!--    添加资方数据窗口-->
-    <el-dialog title="添加资方" :visible.sync="dialogVisible" width="500px" @close="close_dialog()" :close-on-click-modal='false'>
+    <el-dialog title="添加监管方" :visible.sync="dialogVisible" width="500px" @close="close_dialog()" :close-on-click-modal='false'>
       <el-form :model="agencyFormData" ref="agencyFormData" label-position="left" label-width="80px" :rules="rules"
                class="addForm">
         <el-form-item label="机构代码">

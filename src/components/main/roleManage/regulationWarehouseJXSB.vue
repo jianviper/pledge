@@ -1,12 +1,20 @@
 <template>
   <div>
-    <searchAndTable :listUrl="lurl" @returnRowData="acceptRowData" :key="timer"/>
+    <searchAndTable :listUrl="lurl" :roleType="'JGC'" @returnRowData="acceptRowData" :key="timer"/>
     <!--    添加资方数据窗口-->
-    <el-dialog title="添加资方" :visible.sync="dialogVisible" width="500px" @close="close_dialog()" :close-on-click-modal='false'>
+    <el-dialog title="添加监管仓" :visible.sync="dialogVisible" width="500px" @close="close_dialog()"
+               :close-on-click-modal='false'>
       <el-form :model="agencyFormData" ref="agencyFormData" label-position="left" label-width="80px" :rules="rules"
                class="addForm">
         <el-form-item label="机构代码">
           <el-input v-model="agencyFormData.agencyNumber"></el-input>
+        </el-form-item>
+        <el-form-item label="监管方">
+          <el-select v-model="agencyFormData.supervisorId" placeholder="请选择监管方" @change="select_supervisor"
+                     style="width: 100%">
+            <el-option v-for="item in supervisor_options" :key="item.value" :value="item.value" :label="item.label">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="排序">
           <el-input v-model="agencyFormData.sorting" onkeyup="value=value.replace(/[^\d]/g,'')"></el-input>
@@ -18,7 +26,8 @@
           <el-input v-model="agencyFormData.agencyFull"></el-input>
         </el-form-item>
         <el-form-item label="支持产业">
-          <el-select v-model="agencyFormData.industry" placeholder="请选择行业" @change="select_industry" style="width: 100%">
+          <el-select v-model="agencyFormData.industry" placeholder="请选择行业" @change="select_industry"
+                     style="width: 100%">
             <el-option v-for="item in industry_options" :key="item.value" :value="item.value" :label="item.label">
             </el-option>
           </el-select>
@@ -42,7 +51,7 @@
   import searchAndTable from './searchAndTable'
 
   export default {
-    name: "repoListJXSB",
+    name: "regulationWarehouseJXSB",
     components: {
       searchAndTable
     },
@@ -50,6 +59,7 @@
       return {
         addflag: true,
         lurl: 'baseInfo/agency/storageList',
+        supervisor_options: [], //监管方
         timer: '',
         industry_options: [{label: '汽车', value: 0}, {label: '机械设备', value: 1}],
         dialogVisible: false,
@@ -97,6 +107,18 @@
           }
         })
       },
+      select_industry(value) {
+        this.agencyFormData.industry = value;
+      },
+      select_supervisor(value) {
+        this.agencyFormData.supervisorId = value;
+        this.supervisor_options.map((item) => {
+          if (item.value === value) {
+            // console.log(item, value);
+            this.agencyFormData.supervisorName = item.label;
+          }
+        })
+      },
       statusChange(value) {
         this.agencyFormData.state = value;
       },
@@ -106,8 +128,19 @@
       },
       close_dialog() {
         this.$refs['agencyFormData'].resetFields();
+      },
+      get_supervisorList() {
+        this.$axios.post('baseInfo/agency/supervisorList', {current: 1, size: 100, state: 0}).then((response) => {
+          response.data.data.records.map((item, index) => {
+            this.supervisor_options.push({value: item.id, label: item.agencyAbbreviation});
+          })
+        })
+        console.log(this.supervisor_options);
       }
     },
+    mounted() {
+      this.get_supervisorList();
+    }
   }
 </script>
 

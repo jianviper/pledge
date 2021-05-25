@@ -41,7 +41,8 @@
               :cell-style="{'text-align':'center'}">
       <el-table-column prop="agencyNumber" label="机构代码" width="100"></el-table-column>
       <el-table-column prop="agencyAbbreviation" label="机构名称" width="200"></el-table-column>
-      <el-table-column prop="sorting" label="排序" width="100"></el-table-column>
+      <el-table-column v-if="roleType==='JGC'" prop="supervisorName" label="监管方" width="100"></el-table-column>
+      <el-table-column prop="sorting" label="排序" width="80"></el-table-column>
       <el-table-column label="添加时间" width="200">
         <template slot-scope="scope">
           {{scope.row.creationTime | formatDate}}
@@ -52,7 +53,13 @@
           {{scope.row.updateTime | formatDate}}
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="100">
+      <el-table-column v-if="roleType==='JGC' || roleType==='HGF'" prop="industry" label="支持产业" width="80">
+        <template slot-scope="scope">
+          <p v-if="scope.row.industry===0">汽车</p>
+          <p v-else-if="scope.row.industry===1">机械设备</p>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="80">
         <template slot-scope="scope">
           <p v-if="scope.row.state===0">正常</p>
           <p v-else-if="scope.row.state===1">失效</p>
@@ -77,7 +84,7 @@
 
   export default {
     name: "searchAndTable",
-    props: ['listUrl'],
+    props: ['listUrl','roleType'],
     components: {Pager},
     data() {
       return {
@@ -127,13 +134,12 @@
       },
       iconClick(ev) {
         let id = ev.path[3].getElementsByTagName('input')[0].id;
-        console.log(ev, id);
+        // console.log(ev, id);
         if (id === 'name') {
           this.name = '';
         } else if (id === 'code') {
           this.code = '';
         }
-
       },
     },
     mounted() {

@@ -49,7 +49,6 @@
             }
           });
         }
-
         this.activeIndex = activeIndex;
         this.tabsItem = tabs.filter((tab) => tab.ref !== targetName);
         if (JSON.parse(sessionStorage.getItem('currentTab')).ref == targetName) {
@@ -72,9 +71,11 @@
     computed: {
       tabsItem: {
         get: function () {
+          console.log('get');
           return this.$store.getters.getTabs.tabsItem;
         },
         set: function (newValue) {
+          console.log('set');
           this.$store.state.tabsItem = newValue;
         },
       },

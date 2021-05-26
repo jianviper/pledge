@@ -71,11 +71,9 @@
     computed: {
       tabsItem: {
         get: function () {
-          console.log('get');
           return this.$store.getters.getTabs.tabsItem;
         },
         set: function (newValue) {
-          console.log('set');
           this.$store.state.tabsItem = newValue;
         },
       },

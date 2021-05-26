@@ -34,7 +34,8 @@
         <el-button icon="el-icon-circle-plus-outline" type="primary" @click="add">添加</el-button>
       </el-col>
     </el-row>
-    <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
+<!--    tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)-->
+    <el-table :data="tableData"
               border
               stripe
               style="width: 1001px" :header-cell-style="{'text-align':'center'}"
@@ -75,7 +76,7 @@
       </el-table-column>
     </el-table>
     <!--  分页器-->
-    <Pager :dataList="tableData" :currentPage="currentPage" @returnsliceData="accpetSliceData"></Pager>
+    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total" @returnsliceData="accpetSliceData"></Pager>
   </div>
 </template>
 
@@ -84,7 +85,7 @@
 
   export default {
     name: "searchAndTable",
-    props: ['listUrl','roleType'],
+    props: ['listUrl', 'roleType'],
     components: {Pager},
     data() {
       return {
@@ -92,6 +93,7 @@
         code: '',
         currentPage: 1,
         pageSize: 10,
+        total:0,
         statusValue: '',
         statusOption: [
           {value: '', label: '全部'},
@@ -119,14 +121,22 @@
       },
       getAgencyData() { //获取初始化表格数据
         // console.log(new Date().getTime());
-        this.$axios.post(this.listUrl, {"name": "", "agencyNumber": "", "state": ""}).then((response) => {
+        this.$axios.post(this.listUrl, {
+          "name": "",
+          "agencyNumber": "",
+          "state": "",
+          "current": this.currentPage,
+          "size": this.pageSize
+        }).then((response) => {
           this.tableData = response.data.data.records;
+          this.total=response.data.data.totalSize;
         })
       },
       accpetSliceData(data) { //接受分页器返回的数据
         // this.sliceData = data.data;
         this.currentPage = data.currentPage;
         this.pageSize = data.pageSize;
+        this.getAgencyData();
       },
       editRow(index, rowData) {
         console.log(index, rowData);

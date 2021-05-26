@@ -5,7 +5,7 @@
                    :page-sizes="[1,5,10,20]"
                    :page-size="pageSize"
                    layout="total, sizes, prev, pager, next, jumper"
-                   :total="dataList.length">
+                   :total="total">
     </el-pagination>
   </div>
 </template>
@@ -13,15 +13,19 @@
 <script>
   export default {
     name: "Pager",
-    props: ['dataList', 'currentPage'],
+    props: ['dataList', 'currentPage', 'totalSize'],
     data() {
       return {
         current_page: 1, // 当前页码
-        total: 20, // 总条数
+        total: 0, // 总条数
         pageSize: 10, // 每页的数据条数
       }
     },
     methods: {
+      initData() {
+        console.log('pager init',this.dataList);
+        this.total = this.dataList.length;
+      },
       //每页条数改变时触发 选择一页显示多少行
       handleSizeChange(val) {
         // console.log('handleSizeChange',val);
@@ -46,15 +50,21 @@
     },
     watch: {
       currentPage(val, oldVal) {
-
         this.current_page = val;
+      },
+      totalSize(val, oldVal) {
+        console.log('watch totalSize',val);
+        this.total = val;
       }
+    },
+    mounted() {
+      this.initData();
     }
   }
 </script>
 
 <style scoped>
   .block {
-    padding-bottom: 10px;
+    padding-bottom: 20px;
   }
 </style>

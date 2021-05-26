@@ -44,7 +44,7 @@
         }
       }
       return {
-        login_data: {phone: '15700000000', smsCode: '000000'},
+        login_data: {phone: '18600000000', smsCode: '051810'},
         industry_options: [],
         rules: {
           industry: {required: true, message: '请选择行业', trigger: 'change'},
@@ -59,7 +59,7 @@
     },
     methods: {
       get_industry() { //获取行业信息
-        this.$axios.post('webLogin/smsCode', {"phone": "15700000000", "smsCode": "000000"}).then((response) => {
+        this.$axios.post('webLogin/smsCode', {"phone": "18600000000", "smsCode": "051810"}).then((response) => {
           let industry_json = response.data.data.industryMap;
           // console.log(industry_json);
           for (var i in industry_json) {

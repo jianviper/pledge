@@ -5,16 +5,16 @@
     <el-dialog title="添加监管方" :visible.sync="dialogVisible" width="500px" @close="close_dialog()" :close-on-click-modal='false'>
       <el-form :model="agencyFormData" ref="agencyFormData" label-position="left" label-width="80px" :rules="rules"
                class="addForm">
-        <el-form-item label="机构代码">
+        <el-form-item label="机构代码" prop="agencyNumber">
           <el-input v-model="agencyFormData.agencyNumber"></el-input>
         </el-form-item>
-        <el-form-item label="排序">
+        <el-form-item label="排序" prop="sorting">
           <el-input v-model="agencyFormData.sorting" onkeyup="value=value.replace(/[^\d]/g,'')"></el-input>
         </el-form-item>
-        <el-form-item label="机构简称">
+        <el-form-item label="机构简称" prop="agencyAbbreviation">
           <el-input v-model="agencyFormData.agencyAbbreviation"></el-input>
         </el-form-item>
-        <el-form-item label="机构全称">
+        <el-form-item label="机构全称" prop="agencyFull">
           <el-input v-model="agencyFormData.agencyFull"></el-input>
         </el-form-item>
         <el-form-item label="机构状态">
@@ -48,23 +48,11 @@
         dialogVisible: false,
         agencyFormData: {agencyNumber: '', sorting: '', agencyAbbreviation: '', agencyFull: '', state: 0}, //添加资方数据
         rules: {
-          agencyNumber: [
-            {required: true, message: '请输入机构代码', trigger: 'blur'},
-          ],
-          sorting: [
-            {required: true, message: '请输入排序', trigger: 'blur'},
-            {min: 1, max: 6, message: '长度在1到6个字符', trigger: "blur"}
-          ],
-          agencyAbbreviation: [
-            {required: true, message: '请输入机构简称', trigger: 'blur'}
-          ],
-          agencyFull: [
-            {required: true, message: '请输入机构全称', trigger: 'blur'}
-          ],
-          state: [
-            {required: true, message: '请选择状态', trigger: 'change'}
-          ]
-        }
+          agencyNumber: {required: true, message: '请输入机构代码', trigger: 'blur'},
+          supervisorId: {required: true, message: '请选择监管方', trigger: 'change'},
+          sorting: {required: true, message: '请输入排序', trigger: 'blur'},
+          agencyAbbreviation: {required: true, message: '请输入机构简称', trigger: 'blur'},
+          agencyFull: {required: true, message: '请输入机构全称', trigger: 'blur'},}
       }
     },
     methods: {

@@ -76,10 +76,56 @@
           <p v-else-if="scope.row.state===1">失效</p>
         </template>
       </el-table-column>
-
-
+      <el-table-column
+        fixed="right"
+        label="操作"
+        width="100">
+        <template slot-scope="scope">
+          <el-button @click="editRow(scope.$index, scope.row)" type="text" size="small">编辑</el-button>
+        </template>
+      </el-table-column>
     </el-table>
-    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total" @returnsliceData="accpetSliceData"></Pager>
+    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total"
+           @returnsliceData="accpetSliceData"></Pager>
+    <el-dialog title="添加资方" :visible.sync="dialogVisible" width="500px" @close="close_dialog()"
+               :close-on-click-modal='false'>
+      <el-form :model="userFormData" ref="userFormData" label-position="left" label-width="100px" :rules="rules"
+               class="addForm">
+        <el-form-item label="序号" prop="serial">
+          <el-input v-model="userFormData.serial"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="userFormData.mobile"></el-input>
+        </el-form-item>
+        <el-form-item label="用户姓名" prop="name">
+          <el-input v-model="userFormData.name"></el-input>
+        </el-form-item>
+        <el-form-item label="身份证号码" prop="idCardNo">
+          <el-input v-model="userFormData.idCardNo" maxlength="18"></el-input>
+        </el-form-item>
+        <el-form-item label="机构代码" prop="agencyId">
+          <el-select v-model="userFormData.agencyId">
+            <el-option v-for="option in agencyOption"
+                       :key="option.id"
+                       :label="option.agencyAbbreviation"
+                       :value="option.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注" prop="notes">
+          <el-input v-model="userFormData.notes"></el-input>
+        </el-form-item>
+        <el-form-item label="账号状态" prop="state">
+          <el-radio-group v-model="userFormData.state" @change="statusChange">
+            <el-radio :label='0'>正常</el-radio>
+            <el-radio :label='1'>失效</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancel()">取 消</el-button>
+        <el-button type="primary" @click="add_submit(userFormData)">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -90,63 +136,119 @@
     name: "userListJXSB",
     components: {Pager},
     data() {
+      let checkMobile = (rule, value, callback) => {
+        console.log(value);
+        if (!value) {
+          return callback(new Error('手机号码不可为空'));
+        } else if (!/^1(3|4|5|6|7|8)\d{9}$/.test(value)) {
+          return callback(new Error('手机号码格式不正确'));
+        } else {
+          callback();
+        }
+
+      };
       return {
-        searchData: {state: ''},
-        agencyOptions: [],
-        storageOptions: [],
+        addflag: true,
+        dialogVisible: false,
+        searchData: {name: '', mobile: '', agencyId: '', storageId: '', state: ''},
+        agencyOption: [], //添加和修改界面的所属机构选项
+        agencyOptions: [], //所属机构
+        storageOptions: [], //监管仓
         statusOption: [
           {value: '', label: '全部'},
           {value: '0', label: '正常'},
           {value: '1', label: '失效'},
         ],
-        tableData: [],
+        tableData: [], //表格数据
+        userFormData: {serial: '', mobile: '', name: '', idCardNo: '', agencyId: '', notes: '', state: 0},
         currentPage: 1,
         pageSize: 10,
-        total:0,
+        total: 0,
+        rules: {
+          serial: {required: true, message: '请输入序号', trigger: 'blur'},
+          mobile: {validator: checkMobile, trigger: 'blur'},
+          name: {required: true, message: '请输入用户姓名', trigger: 'blur'},
+          idCardNo: [{required: true, message: '请输入身份证号码', trigger: 'blur'},
+            {min: 18, max: 18, message: '身份证号码格式不对', trigger: "blur"}
+          ],
+          state: {required: true, message: '请选择状态', trigger: 'change'},
+          agencyId: {required: true, message: '请选择机构', trigger: 'change'}
+        }
       }
     },
     methods: {
       add() {
-
+        this.dialogVisible = true;
       },
-      iconClick(ev) {
-        let id = ev.path[3].getElementsByTagName('input')[0].id;
-        // console.log(ev, id);
-        if (id === 'name') {
-          this.name = '';
-        } else if (id === 'code') {
-          this.code = '';
+      add_submit() {
+        this.$refs['userFormData'].validate((valid) => {
+          if (valid) {
+            this.$axios.post('baseInfo/user/save', this.userFormData).then((response) => {
+              if (response.data.code === 200) {
+                this.dialogVisible = false;
+                if (this.addflag) {
+                  this.init_data();
+                }
+              }
+            });
+          } else {
+            return false;
+          }
+        })
+      },
+      editRow(index, rowData) {
+        console.log(index, rowData);
+        this.userFormData = JSON.parse(JSON.stringify(rowData));
+        this.dialogVisible = true;
+      },
+      statusChange(value) {
+        this.userFormData.state = value;
+      },
+      iconClick(ev) { //点击输入框右侧 x 按钮清空输入框
+        let ele_id = ev.path[3].getElementsByTagName('input')[0].id;
+        if (ele_id === 'name') {
+          this.searchData.name = '';
+        } else if (ele_id === 'mobile') {
+          this.searchData.mobile = '';
         }
       },
       get_agencyOptions() {
         this.$axios.get('baseInfo/agency/allList').then((response) => {
+          this.agencyOption = JSON.parse(JSON.stringify(response.data.data));
           this.agencyOptions = response.data.data;
+          this.agencyOptions.splice(0, 0, {agencyAbbreviation: '全部', id: ''});
         })
       },
       get_storageOptions() {
         this.$axios.post('baseInfo/agency/storageList', {"current": 1, "size": 100}).then((response) => {
           this.storageOptions = response.data.data.records;
+          this.storageOptions.splice(0, 0, {agencyAbbreviation: '全部', id: ''});
         })
       },
       init_data() {
         this.$axios.post('baseInfo/user/list',
           {
-            "name": "",
-            "mobile": "",
-            "agencyId": "",
-            "storageId": "",
-            "state": "",
+            "name": this.searchData.name,
+            "mobile": this.searchData.mobile,
+            "agencyId": this.searchData.agencyId,
+            "storageId": this.searchData.storageId,
+            "state": this.searchData.state,
             "current": this.currentPage,
             "size": this.pageSize,
           }).then((response) => {
           this.tableData = response.data.data.records;
-          this.total=response.data.data.totalSize;
+          this.total = response.data.data.totalSize;
         })
       },
       search() {
-        console.log(this.searchData);
-        this.$axios.post('baseInfo/user/list', this.searchData).then((response) => {
+        let data = JSON.parse(JSON.stringify(this.searchData));
+        data.current = 1;
+        data.size = this.pageSize;
+        console.log(data);
+        this.$axios.post('baseInfo/user/list', data).then((response) => {
+          this.currentPage = 1;
           this.tableData = response.data.data.records;
+          this.total = response.data.data.totalSize;
         })
       },
       accpetSliceData(data) { //接受分页器返回的数据
@@ -154,6 +256,15 @@
         this.pageSize = data.pageSize;
         this.init_data();
       },
+      cancel() {
+        this.dialogVisible = false;
+        this.userFormData={state:0};
+        this.$refs['userFormData'].resetFields();
+      },
+      close_dialog() {
+        this.userFormData={state:0};
+        this.$refs['userFormData'].resetFields();
+      }
     },
     mounted() {
       this.init_data();
@@ -178,5 +289,14 @@
 
   .el-select {
     float: left;
+  }
+
+  .addForm .el-form-item {
+    margin-left: 50px;
+    margin-right: 50px;
+  }
+
+  .el-dialog > .el-dialog__body {
+    padding-bottom: 0px;
   }
 </style>

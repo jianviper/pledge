@@ -23,7 +23,7 @@
     },
     methods: {
       initData() {
-        console.log('pager init',this.dataList);
+        // console.log('pager init',this.dataList);
         this.total = this.dataList.length;
       },
       //每页条数改变时触发 选择一页显示多少行
@@ -50,6 +50,7 @@
     },
     watch: {
       currentPage(val, oldVal) {
+        console.log('watch current',val);
         this.current_page = val;
       },
       totalSize(val, oldVal) {

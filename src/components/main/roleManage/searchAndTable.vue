@@ -34,8 +34,8 @@
         <el-button icon="el-icon-circle-plus-outline" type="primary" @click="add">添加</el-button>
       </el-col>
     </el-row>
-<!--    tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)-->
-    <el-table :data="tableData"
+    <!--    tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)-->
+    <el-table :data="tableData" :key="timer"
               border
               stripe
               style="width: 1001px" :header-cell-style="{'text-align':'center'}"
@@ -76,7 +76,8 @@
       </el-table-column>
     </el-table>
     <!--  分页器-->
-    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total" @returnsliceData="accpetSliceData"></Pager>
+    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total"
+           @returnsliceData="accpetSliceData"></Pager>
   </div>
 </template>
 
@@ -89,11 +90,12 @@
     components: {Pager},
     data() {
       return {
+        timer: '',
         name: '',
         code: '',
         currentPage: 1,
         pageSize: 10,
-        total:0,
+        total: 0,
         statusValue: '',
         statusOption: [
           {value: '', label: '全部'},
@@ -104,32 +106,36 @@
       }
     },
     methods: {
-      add() {
+      add() { //点击添加
         let formData = {agencyNumber: '', sorting: '', agencyAbbreviation: '', agencyFull: '', state: 0};
         this.$emit('returnRowData', {data: formData, dialogVisible: true});
       },
       search() {
         // console.log(this.name, this.code, this.statusValue);
         this.$axios.post(this.listUrl, {
-          name: this.name,
-          agencyNumber: this.code,
-          state: this.statusValue
+          "name": this.name,
+          "agencyNumber": this.code,
+          "state": this.statusValue,
+          "current": 1,
+          "size": this.pageSize
         }).then((response) => {
+          this.timer = new Date().getTime();
           this.currentPage = 1;
           this.tableData = response.data.data.records;
+          this.total = response.data.data.totalSize;
         })
       },
       getAgencyData() { //获取初始化表格数据
         // console.log(new Date().getTime());
         this.$axios.post(this.listUrl, {
-          "name": "",
-          "agencyNumber": "",
-          "state": "",
+          "name": this.name,
+          "agencyNumber": this.code,
+          "state": this.statusValue,
           "current": this.currentPage,
           "size": this.pageSize
         }).then((response) => {
           this.tableData = response.data.data.records;
-          this.total=response.data.data.totalSize;
+          this.total = response.data.data.totalSize;
         })
       },
       accpetSliceData(data) { //接受分页器返回的数据
@@ -143,11 +149,10 @@
         this.$emit('returnRowData', {data: JSON.parse(JSON.stringify(rowData)), dialogVisible: true, addflag: false})
       },
       iconClick(ev) {
-        let id = ev.path[3].getElementsByTagName('input')[0].id;
-        // console.log(ev, id);
-        if (id === 'name') {
+        let ele_id = ev.path[3].getElementsByTagName('input')[0].id;
+        if (ele_id === 'name') {
           this.name = '';
-        } else if (id === 'code') {
+        } else if (ele_id === 'code') {
           this.code = '';
         }
       },

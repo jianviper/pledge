@@ -6,33 +6,34 @@
                :close-on-click-modal='false'>
       <el-form :model="agencyFormData" ref="agencyFormData" label-position="left" label-width="80px" :rules="rules"
                class="addForm">
-        <el-form-item label="机构代码">
+        <el-form-item label="机构代码" prop="agencyNumber">
           <el-input v-model="agencyFormData.agencyNumber"></el-input>
         </el-form-item>
-        <el-form-item label="监管方">
+        <el-form-item label="监管方" prop="supervisorId">
           <el-select v-model="agencyFormData.supervisorId" placeholder="请选择监管方" @change="select_supervisor"
                      style="width: 100%">
             <el-option v-for="item in supervisor_options" :key="item.value" :value="item.value" :label="item.label">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input v-model="agencyFormData.sorting" onkeyup="value=value.replace(/[^\d]/g,'')"></el-input>
+        <el-form-item label="排序" prop="sorting">
+          <el-input v-model="agencyFormData.sorting" onkeyup="value=value.replace(/[^\d]/g,'')"
+                    maxlength="6"></el-input>
         </el-form-item>
-        <el-form-item label="机构简称">
+        <el-form-item label="机构简称" prop="agencyAbbreviation">
           <el-input v-model="agencyFormData.agencyAbbreviation"></el-input>
         </el-form-item>
-        <el-form-item label="机构全称">
+        <el-form-item label="机构全称" prop="agencyFull">
           <el-input v-model="agencyFormData.agencyFull"></el-input>
         </el-form-item>
-        <el-form-item label="支持产业">
+        <el-form-item label="支持产业" prop="industry">
           <el-select v-model="agencyFormData.industry" placeholder="请选择行业" @change="select_industry"
                      style="width: 100%">
             <el-option v-for="item in industry_options" :key="item.value" :value="item.value" :label="item.label">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="机构状态">
+        <el-form-item label="机构状态" prop="state">
           <el-radio-group v-model="agencyFormData.state" @change="statusChange">
             <el-radio :label='0'>正常</el-radio>
             <el-radio :label='1'>失效</el-radio>
@@ -65,22 +66,13 @@
         dialogVisible: false,
         agencyFormData: {agencyNumber: '', sorting: '', agencyAbbreviation: '', agencyFull: '', state: 0}, //添加资方数据
         rules: {
-          agencyNumber: [
-            {required: true, message: '请输入机构代码', trigger: 'blur'},
-          ],
-          sorting: [
-            {required: true, message: '请输入排序', trigger: 'blur'},
-            {min: 1, max: 6, message: '长度在1到6个字符', trigger: "blur"}
-          ],
-          agencyAbbreviation: [
-            {required: true, message: '请输入机构简称', trigger: 'blur'}
-          ],
-          agencyFull: [
-            {required: true, message: '请输入机构全称', trigger: 'blur'}
-          ],
-          state: [
-            {required: true, message: '请选择状态', trigger: 'change'}
-          ]
+          agencyNumber: {required: true, message: '请输入机构代码', trigger: 'blur'},
+          supervisorId: {required: true, message: '请选择监管方', trigger: 'change'},
+          sorting: {required: true, message: '请输入排序', trigger: 'blur'},
+          agencyAbbreviation: {required: true, message: '请输入机构简称', trigger: 'blur'},
+          agencyFull: {required: true, message: '请输入机构全称', trigger: 'blur'},
+          state: {required: true, message: '请选择状态', trigger: 'change'},
+          industry: {required: true, message: '请选择支持产业', trigger: 'change'},
         }
       }
     },

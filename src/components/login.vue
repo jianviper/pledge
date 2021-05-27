@@ -42,7 +42,7 @@
         } else {
           callback()
         }
-      }
+      };
       return {
         login_data: {phone: '18600000000', smsCode: '051810'},
         industry_options: [],

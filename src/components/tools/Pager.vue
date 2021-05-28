@@ -64,8 +64,9 @@
   }
 </script>
 
-<style scoped>
+<style>
   .block {
+    margin-left: 20px;
     padding-bottom: 20px;
   }
 </style>

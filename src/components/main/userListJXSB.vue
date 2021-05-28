@@ -76,17 +76,17 @@
           <p v-else-if="scope.row.state===1">失效</p>
         </template>
       </el-table-column>
-      <el-table-column
-        fixed="right"
-        label="操作"
-        width="100">
+      <el-table-column fixed="right" label="操作" width="200">
         <template slot-scope="scope">
           <el-button @click="editRow(scope.$index, scope.row)" type="text" size="small">编辑</el-button>
+          <el-button @click="delRow(scope.$index, scope.row)" type="text" size="small">删除</el-button>
+          <el-button @click="setRole(scope.$index, scope.row)" type="text" size="small">配置角色</el-button>
+          <el-button @click="setStorage(scope.$index, scope.row)" type="text" size="small">配置监管仓</el-button>
         </template>
       </el-table-column>
     </el-table>
     <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total"
-           @returnsliceData="accpetSliceData"></Pager>
+           @returnsliceData="accpetSliceData" class="pager"></Pager>
     <el-dialog title="添加资方" :visible.sync="dialogVisible" width="500px" @close="close_dialog()"
                :close-on-click-modal='false'>
       <el-form :model="userFormData" ref="userFormData" label-position="left" label-width="100px" :rules="rules"
@@ -126,6 +126,22 @@
         <el-button type="primary" @click="add_submit(userFormData)">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="用户角色配置" :visible.sync="setRoleVisible" width="500px">
+      <el-radio-group v-model="role_value" style="text-align: left">
+        <el-radio v-for="item in roleOptions" :label="item.id" :key="item.id">{{item.description}}</el-radio>
+      </el-radio-group>
+      <div style="text-align: right">
+        <el-button type="primary" @click="role_submit" style="text-align: right">确 定</el-button>
+        <el-button type="primary" @click="setRoleVisible=false;" style="text-align: right">取 消</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="监管仓配置" :visible.sync="setStroageVisible" width="600px">
+      <el-checkbox-group v-model="storageCheckList" @change="selectChange">
+        <el-checkbox v-for="item in storageOption" :label="item.id"  :key="item.id">
+          {{item.agencyAbbreviation}}
+        </el-checkbox>
+      </el-checkbox-group>
+    </el-dialog>
   </div>
 </template>
 
@@ -150,10 +166,16 @@
       return {
         addflag: true,
         dialogVisible: false,
+        setRoleVisible: false,
+        setStroageVisible: false,
         searchData: {name: '', mobile: '', agencyId: '', storageId: '', state: ''},
         agencyOption: [], //添加和修改界面的所属机构选项
         agencyOptions: [], //所属机构
+        storageOption: [], //监管仓配置选项
         storageOptions: [], //监管仓
+        roleOptions: [],
+        role_value: '',
+        storageCheckList: [],
         statusOption: [
           {value: '', label: '全部'},
           {value: '0', label: '正常'},
@@ -161,6 +183,7 @@
         ],
         tableData: [], //表格数据
         userFormData: {serial: '', mobile: '', name: '', idCardNo: '', agencyId: '', notes: '', state: 0},
+        rowData: {},
         currentPage: 1,
         pageSize: 10,
         total: 0,
@@ -201,6 +224,72 @@
         this.userFormData = JSON.parse(JSON.stringify(rowData));
         this.dialogVisible = true;
       },
+      delRow(index, rowData) {
+        this.$confirm('此操作将删除该条记录, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$axios.delete('baseInfo/user/delete/' + rowData.id).then((response) => {
+            if (response.data.code === 200) {
+              this.init_data();
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+            } else {
+              this.$message({
+                type: 'error',
+                message: response.data.message
+              });
+            }
+          }).catch(() => {
+            this.$message.warning('删除失败');
+          })
+        }).catch(() => {
+          this.$message.info('已取消删除');
+        });
+      },
+      setRole(index, rowData) {
+        this.role_value = rowData.roleId + '';
+        this.setRoleVisible = true;
+        this.rowData = JSON.parse(JSON.stringify(rowData));
+      },
+      role_submit() {
+        console.log(this.role_value, this.rowData);
+        let data = {
+          // 'i': this.role_value == 1 || this.role_value == 8 ? 1 : this.role_value - 1,
+          'id': this.role_value,
+          'userId': this.rowData.id
+        };
+        this.$axios.post('baseInfo/role/saveUserRole', data).then((response) => {
+          if (response.data.code === 200) {
+            this.init_data();
+            this.setRoleVisible = false;
+            this.$message({
+              type: 'success',
+              message: '配置成功!'
+            });
+          } else {
+            this.$message({
+              type: 'error',
+              message: response.data.message
+            });
+          }
+        })
+      },
+      setStorage(index, rowData) {
+        console.log(index, rowData);
+        console.log(this.storageOption);
+        rowData.warehouseIds.split(',').map((item) => {
+          this.storageCheckList.push(item);
+        });
+        console.log(this.storageCheckList);
+        this.setStroageVisible = true;
+      },
+      selectChange(value) {
+        console.log(value);
+      },
       statusChange(value) {
         this.userFormData.state = value;
       },
@@ -221,9 +310,15 @@
       },
       get_storageOptions() {
         this.$axios.post('baseInfo/agency/storageList', {"current": 1, "size": 100}).then((response) => {
+          this.storageOption = JSON.parse(JSON.stringify(response.data.data.records));
           this.storageOptions = response.data.data.records;
           this.storageOptions.splice(0, 0, {agencyAbbreviation: '全部', id: ''});
         })
+      },
+      get_role() {
+        this.$axios.get('baseInfo/role/list').then((response) => {
+          this.roleOptions = response.data.data;
+        });
       },
       init_data() {
         this.$axios.post('baseInfo/user/list',
@@ -238,7 +333,7 @@
           }).then((response) => {
           this.tableData = response.data.data.records;
           this.total = response.data.data.totalSize;
-        })
+        });
       },
       search() {
         let data = JSON.parse(JSON.stringify(this.searchData));
@@ -258,11 +353,11 @@
       },
       cancel() {
         this.dialogVisible = false;
-        this.userFormData={state:0};
+        this.userFormData = {state: 0};
         this.$refs['userFormData'].resetFields();
       },
       close_dialog() {
-        this.userFormData={state:0};
+        this.userFormData = {state: 0};
         this.$refs['userFormData'].resetFields();
       }
     },
@@ -270,6 +365,7 @@
       this.init_data();
       this.get_agencyOptions();
       this.get_storageOptions();
+      this.get_role();
     }
   }
 </script>
@@ -294,9 +390,5 @@
   .addForm .el-form-item {
     margin-left: 50px;
     margin-right: 50px;
-  }
-
-  .el-dialog > .el-dialog__body {
-    padding-bottom: 0px;
   }
 </style>

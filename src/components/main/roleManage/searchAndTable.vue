@@ -69,7 +69,7 @@
       <el-table-column
         fixed="right"
         label="操作"
-        width="100">
+        width="80">
         <template slot-scope="scope">
           <el-button @click="editRow(scope.$index, scope.row)" type="text" size="small">编辑</el-button>
         </template>

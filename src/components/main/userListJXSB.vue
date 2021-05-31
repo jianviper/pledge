@@ -61,7 +61,7 @@
     <el-table :data="tableData"
               border
               stripe
-              style="width: 1001px" :header-cell-style="{'text-align':'center'}"
+              style="width: 1061px" :header-cell-style="{'text-align':'center'}"
               :cell-style="{'text-align':'center'}">
       <el-table-column prop="serial" label="序号" width="80"></el-table-column>
       <el-table-column prop="mobile" label="登录账号" width="160"></el-table-column>
@@ -74,9 +74,10 @@
         <template slot-scope="scope">
           <p v-if="scope.row.state===0">正常</p>
           <p v-else-if="scope.row.state===1">失效</p>
+          <p v-else-if="scope.row.state===2">删除</p>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="200">
+      <el-table-column fixed="right" label="操作" width="180">
         <template slot-scope="scope">
           <el-button @click="editRow(scope.$index, scope.row)" type="text" size="small">编辑</el-button>
           <el-button @click="delRow(scope.$index, scope.row)" type="text" size="small">删除</el-button>
@@ -118,6 +119,7 @@
           <el-radio-group v-model="userFormData.state" @change="statusChange">
             <el-radio :label='0'>正常</el-radio>
             <el-radio :label='1'>失效</el-radio>
+            <el-radio :label='2'>删除</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -136,11 +138,15 @@
       </div>
     </el-dialog>
     <el-dialog title="监管仓配置" :visible.sync="setStroageVisible" width="600px">
-      <el-checkbox-group v-model="storageCheckList" @change="selectChange">
-        <el-checkbox v-for="item in storageOption" :label="item.id"  :key="item.id">
+      <el-checkbox-group v-model="storageCheckList">
+        <el-checkbox v-for="item in storageOption" :label="item.id" :key="item.id">
           {{item.agencyAbbreviation}}
         </el-checkbox>
       </el-checkbox-group>
+      <div style="text-align: right">
+        <el-button type="primary" @click="storage_submit" style="text-align: right">确 定</el-button>
+        <el-button type="primary" @click="setStroageVisible=false;" style="text-align: right">取 消</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -180,6 +186,7 @@
           {value: '', label: '全部'},
           {value: '0', label: '正常'},
           {value: '1', label: '失效'},
+          {value: '2', label: '删除'},
         ],
         tableData: [], //表格数据
         userFormData: {serial: '', mobile: '', name: '', idCardNo: '', agencyId: '', notes: '', state: 0},
@@ -281,14 +288,50 @@
       setStorage(index, rowData) {
         console.log(index, rowData);
         console.log(this.storageOption);
-        rowData.warehouseIds.split(',').map((item) => {
-          this.storageCheckList.push(item);
-        });
-        console.log(this.storageCheckList);
+        this.storageCheckList = [];
+        this.rowData = JSON.parse(JSON.stringify(rowData));
+        if (rowData.warehouseIds) {
+          rowData.warehouseIds.split(',').map((item) => {
+            this.storageCheckList.push(item);
+          });
+        }
         this.setStroageVisible = true;
       },
-      selectChange(value) {
-        console.log(value);
+      storage_submit() { //配置监管仓提交
+        let warehouseNames = [];
+        this.storageCheckList.map((item) => {
+          this.storageOption.map((op) => {
+            if (op.id === item) {
+              warehouseNames.push(op.agencyAbbreviation);
+              return true;
+            }
+          })
+        });
+        warehouseNames = warehouseNames.join();
+        let warehouseIds = this.storageCheckList.join();
+        console.log(warehouseIds, warehouseNames);
+        this.$axios.post('baseInfo/user/deployWarehouse', {
+          'userId': this.rowData.id,
+          'warehouseIds': warehouseIds,
+          'warehouseNames': warehouseNames
+        }).then((response) => {
+          if (response.data.code === 200) {
+            this.init_data();
+            this.setStroageVisible = false;
+            this.$message({
+              type: 'success',
+              message: '配置成功!'
+            });
+          } else {
+            this.$message({
+              type: 'error',
+              message: response.data.message
+            });
+          }
+        })
+      },
+      storageSelectChange(value) {
+        // console.log('select', value);
       },
       statusChange(value) {
         this.userFormData.state = value;
@@ -339,7 +382,6 @@
         let data = JSON.parse(JSON.stringify(this.searchData));
         data.current = 1;
         data.size = this.pageSize;
-        console.log(data);
         this.$axios.post('baseInfo/user/list', data).then((response) => {
           this.currentPage = 1;
           this.tableData = response.data.data.records;

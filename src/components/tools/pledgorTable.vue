@@ -2,7 +2,7 @@
   <el-table :data="tableData"
             border
             stripe
-            style="width: 1061px" :header-cell-style="{'text-align':'center'}"
+            style="width: 100%" :header-cell-style="{'text-align':'center'}"
             :cell-style="{'text-align':'center'}">
     <el-table-column prop="businessName" label="公司名称" width="100"></el-table-column>
     <el-table-column prop="industry" label="支持产业" width="100">
@@ -26,6 +26,15 @@
         <p v-if="scope.row.state===0">待完善</p>
         <p v-else-if="scope.row.state===1">待配置</p>
         <p v-else-if="scope.row.state===2">已完成</p>
+      </template>
+    </el-table-column>
+    <el-table-column
+      fixed="right"
+      label="操作"
+      width="180">
+      <template slot-scope="scope">
+        <el-button @click="configureProcess(scope.$index, scope.row)" type="text" size="small">配置流程</el-button>
+        <el-button @click="pledgorMgt(scope.$index, scope.row)" type="text" size="small">出质人管理</el-button>
       </template>
     </el-table-column>
   </el-table>

@@ -71,6 +71,73 @@
     </el-tabs>
     <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total"
            @returnsliceData="accpetSliceData" class="pager"></Pager>
+    <el-dialog title="添加客户" :visible.sync="dialogVisible" width="700px" @close="close_dialog()"
+               :close-on-click-modal='false'>
+      <el-form :model="customerFormData" ref="customerFormData" label-width="100px"
+               class="customerForm">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="姓名" prop="customerName">
+              <el-input v-model="customerFormData.customerName"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="手机" prop="mobile">
+              <el-input v-model="customerFormData.mobile"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="身份证" prop="idCardNo">
+              <el-input v-model="customerFormData.idCardNo"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="有效期" prop="idCardValidity">
+              <el-input v-model="customerFormData.idCardValidity"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="户籍" prop="households">
+              <el-input v-model="customerFormData.households"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="身份证正面" prop="idCardNationalUrl">
+              <el-upload
+                class="avatar-uploader"
+                action="api/thirdparty/file/uploadImg"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+                :http-request="uploadImg">
+                <img v-if="idCardImgHead" :src="idCardImgHead" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="身份证反面" prop="idCardPortraiUrlt">
+              <el-upload
+                class="avatar-uploader"
+                action="api/thirdparty/file/uploadImg"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+                :http-request="uploadImg">
+                <img v-if="idCardImgBack" :src="idCardImgBack" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -83,10 +150,15 @@
     components: {PledgorTable, Pager},
     data() {
       return {
+        dialogVisible: false,
+        customerFormData: {},
         activeTab: 'pane-0',
         currentPage: 1,
         pageSize: 10,
         total: 0,
+        idCardImgHead: '',//身份证正面
+        idCardImgBack: '',//身份证反面
+        imgHeader: {'Authorization': sessionStorage.getItem('token')},
         searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: '', state: ''},
         tableData: [],//用于切换标签页区分用的表格数据
         storageOptions: [],
@@ -120,12 +192,36 @@
         console.log(data);
         this.$axios.post('baseInfo/customer/list', data).then((response) => {
           this.currentPage = 1;
-          this.dataAll.data = response.data.data.records;
-          this.dataAll.total = response.data.data.totalSize;
+          this.tableData = response.data.data.records;
+          this.total = response.data.data.totalSize;
+        })
+      },
+      handleAvatarSuccess(res, file) {
+        console.log(res);
+        this.idCardImgHead = URL.createObjectURL(file.raw);
+      },
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 4;
+
+        if (!isJPG) {
+          this.$message.error('上传文件只能是 图片 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传图片大小不能超过 4MB!');
+        }
+        return isJPG && isLt2M;
+      },
+      uploadImg(param) {
+        let formData = new FormData();
+        formData.append('image', param.file);
+        // console.log(param, formData.get('image'));
+        this.$axios.post('thirdparty/file/uploadImg', formData).then((response) => {
+          console.log(response.data);
         })
       },
       add() {
-
+        this.dialogVisible = true;
       },
       handleClick(tab, event) {
         console.log(tab.name, event);
@@ -226,6 +322,10 @@
           this.dataP3.data = response.data.data.records;
           this.dataP3.total = response.data.data.totalSize;
         });
+      },
+      close_dialog() {
+        this.userFormData = {state: 0};
+        this.$refs['userFormData'].resetFields();
       }
     },
     mounted() {
@@ -248,5 +348,36 @@
 
   .el-select {
     float: left;
+  }
+
+  /deep/ .customerForm label {
+    text-align: center;
+  }
+
+  /deep/ .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
 </style>

@@ -45,7 +45,7 @@
       };
       return {
         login_data: {phone: '18600000000', smsCode: '051810'},
-        industry_options: [],
+        industry_options: [{label: '汽车', value: '0'}, {label: '机械设备', value: '1'}],
         rules: {
           industry: {required: true, message: '请选择行业', trigger: 'change'},
           phone: [
@@ -100,7 +100,7 @@
       }
     },
     mounted() {
-      this.get_industry();
+      // this.get_industry();
     }
   }
 </script>

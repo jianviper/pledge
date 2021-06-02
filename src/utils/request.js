@@ -14,11 +14,15 @@ const service = axios.create({
 // 2.请求拦截器
 service.interceptors.request.use(config => {
   //发请求前做的一些处理，数据转化，配置请求头，设置token,设置loading等，根据需求去添加
-  if (config.data) {
+  if (config.data && config.url != 'thirdparty/file/uploadImg') {
     config.data = JSON.stringify(config.data); //数据转化,也可以使用qs转换
   }
+  let contentType = 'application/json';
+  if (config.url === 'thirdparty/file/uploadImg') {
+    contentType = 'multipart/form-data';
+  }
   config.headers = {
-    'Content-Type': 'application/json', //配置请求头
+    'Content-Type': contentType, //配置请求头
     'Authorization': '',//配置token
   }
   //注意使用token的时候需要引入cookie方法或者用本地localStorage等方法，推荐js-cookie

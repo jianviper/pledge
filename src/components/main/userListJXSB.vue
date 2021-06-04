@@ -125,7 +125,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancel()">取 消</el-button>
-        <el-button type="primary" @click="add_submit(userFormData)">确 定</el-button>
+        <el-button type="primary" @click="add_submit">确 定</el-button>
       </span>
     </el-dialog>
     <el-dialog title="用户角色配置" :visible.sync="setRoleVisible" width="500px">

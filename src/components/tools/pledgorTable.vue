@@ -1,52 +1,74 @@
 <template>
-  <el-table :data="tableData"
-            border
-            stripe
-            style="width: 100%" :header-cell-style="{'text-align':'center'}"
-            :cell-style="{'text-align':'center'}">
-    <el-table-column prop="businessName" label="公司名称" width="100"></el-table-column>
-    <el-table-column prop="industry" label="支持产业" width="100">
-      <template slot-scope="scope">
-        <p v-if="scope.row.industry===0">汽车</p>
-        <p v-else-if="scope.row.industry===1">机械设备</p>
-      </template>
-    </el-table-column>
-    <el-table-column prop="name" label="法定代表人" width="100"></el-table-column>
-    <el-table-column prop="mobile" label="联系方式" width="120"></el-table-column>
-    <el-table-column prop="idCardNo" label="身份证" width="180"></el-table-column>
-    <el-table-column prop="businessAddress" label="地址" width="200"></el-table-column>
-    <el-table-column prop="agencyAbbreviation" label="监管仓" width="100"></el-table-column>
-    <el-table-column prop="creationTime" label="添加时间" width="180">
-      <template slot-scope="scope">
-        {{scope.row.creationTime | formatDate}}
-      </template>
-    </el-table-column>
-    <el-table-column prop="state" label="状态" width="80">
-      <template slot-scope="scope">
-        <p v-if="scope.row.state===0">待完善</p>
-        <p v-else-if="scope.row.state===1">待配置</p>
-        <p v-else-if="scope.row.state===2">已完成</p>
-      </template>
-    </el-table-column>
-    <el-table-column
-      fixed="right"
-      label="操作"
-      width="180">
-      <template slot-scope="scope">
-        <el-button @click="configureProcess(scope.$index, scope.row)" type="text" size="small">配置流程</el-button>
-        <el-button @click="pledgorMgt(scope.$index, scope.row)" type="text" size="small">出质人管理</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+  <div>
+    <el-table :data="tableData"
+              border
+              stripe
+              style="width: 100%" :header-cell-style="{'text-align':'center'}"
+              :cell-style="{'text-align':'center'}">
+      <el-table-column prop="businessName" label="公司名称" width="100"></el-table-column>
+      <el-table-column prop="industry" label="支持产业" width="100">
+        <template slot-scope="scope">
+          <p v-if="scope.row.industry===0">汽车</p>
+          <p v-else-if="scope.row.industry===1">机械设备</p>
+        </template>
+      </el-table-column>
+      <el-table-column prop="name" label="法定代表人" width="100"></el-table-column>
+      <el-table-column prop="mobile" label="联系方式" width="120"></el-table-column>
+      <el-table-column prop="idCardNo" label="身份证" width="180"></el-table-column>
+      <el-table-column prop="businessAddress" label="地址" width="200"></el-table-column>
+      <el-table-column prop="agencyAbbreviation" label="监管仓" width="100"></el-table-column>
+      <el-table-column prop="creationTime" label="添加时间" width="180">
+        <template slot-scope="scope">
+          {{scope.row.creationTime | formatDate}}
+        </template>
+      </el-table-column>
+      <el-table-column prop="state" label="状态" width="80">
+        <template slot-scope="scope">
+          <p v-if="scope.row.state===0">待完善</p>
+          <p v-else-if="scope.row.state===1">待配置</p>
+          <p v-else-if="scope.row.state===2">已完成</p>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        label="操作"
+        width="180">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.state===0" @click="improveCustomer(scope.$index, scope.row)" type="text"
+                     size="small">完善客户
+          </el-button>
+          <el-button v-if="scope.row.state===1 ||scope.row.state===2" @click="configureProcess(scope.$index, scope.row)"
+                     type="text"
+                     size="small">配置流程
+          </el-button>
+          <el-button @click="pledgorMgt(scope.$index, scope.row)" type="text" size="small">出质人管理</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <czr-manager :drawerVisible="czrDrawerVisible" :customerId="customerId"/>
+  </div>
 </template>
 
 <script>
   import Pager from '../tools/Pager'
+  import czrManager from '../tools/czrManager'
 
   export default {
     name: "pledgorTable",
-    props: ['tableData'],
-    components: {Pager},
+    props: ['tableData', 'currentTab'],
+    components: {Pager, czrManager},
+    data() {
+      return {
+        czrDrawerVisible: false,
+        customerId:'',
+      }
+    },
+    methods: {
+      pledgorMgt(index, rowData) {
+        this.czrDrawerVisible = new Date().getTime();
+        this.customerId=rowData.id;
+      }
+    }
 
   }
 </script>

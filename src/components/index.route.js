@@ -1,4 +1,6 @@
-let router = require.context("./main", true, /.vue/); //  require.context()是webpack提供的方法,这个方法的第一个参数是require的一个文件夹，第二个参数是否遍历子目录，第三个参数是筛选什么类型的文件。
+//  require.context()是webpack提供的方法
+//  这个方法的第一个参数是require的一个文件夹，第二个参数是否遍历子目录，第三个参数是筛选什么类型的文件。
+let router = require.context("./main", true, /.vue/);
 let arr = [];
 // router是一个方法，直接调用会出错，router.keys()是router里的一个静态方法。
 // console.log(router.keys()); // ["./roleManage/managementListJXSB.vue"]

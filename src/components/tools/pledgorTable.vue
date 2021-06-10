@@ -5,7 +5,7 @@
               stripe
               style="width: 100%" :header-cell-style="{'text-align':'center'}"
               :cell-style="{'text-align':'center'}">
-      <el-table-column prop="businessName" label="公司名称" width="100"></el-table-column>
+      <el-table-column prop="businessName" label="公司名称" width="160"></el-table-column>
       <el-table-column prop="industry" label="支持产业" width="100">
         <template slot-scope="scope">
           <p v-if="scope.row.industry===0">汽车</p>
@@ -60,13 +60,17 @@
     data() {
       return {
         czrDrawerVisible: false,
-        customerId:'',
+        customerId: '',
       }
     },
     methods: {
       pledgorMgt(index, rowData) {
         this.czrDrawerVisible = new Date().getTime();
-        this.customerId=rowData.id;
+        this.customerId = rowData.id;
+      },
+      improveCustomer(index, rowData) {
+        console.log(rowData);
+        this.$emit('returnRowData', rowData);
       }
     }
 

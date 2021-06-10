@@ -13,7 +13,7 @@
 <script>
   export default {
     name: "Pager",
-    props: ['dataList', 'currentPage', 'totalSize'],
+    props: ['dataList', 'currentPage', 'totalSize', 'page_size'],
     data() {
       return {
         current_page: 1, // 当前页码
@@ -50,12 +50,16 @@
     },
     watch: {
       currentPage(val, oldVal) {
-        console.log('watch current',val);
+        console.log('watch current', val);
         this.current_page = val;
       },
       totalSize(val, oldVal) {
-        console.log('watch totalSize',val);
+        console.log('watch totalSize', val);
         this.total = val;
+      },
+      page_size(val, oldVal) {
+        console.log('watch pageSize', val);
+        this.pageSize = val;
       }
     },
     mounted() {

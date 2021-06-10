@@ -57,10 +57,10 @@
     </el-row>
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="全部" name="pane-0">
-        <PledgorTable :tableData="tableData" :currentTab="activeTab"/>
+        <PledgorTable :tableData="tableData" :currentTab="activeTab" @returnRowData="acceptRowData"/>
       </el-tab-pane>
       <el-tab-pane label="待完善" name="pane-1">
-        <PledgorTable :tableData="tableData" :currentTab="activeTab"/>
+        <PledgorTable :tableData="tableData" :currentTab="activeTab" @returnRowData="acceptRowData"/>
       </el-tab-pane>
       <el-tab-pane label="待配置" name="pane-2">
         <PledgorTable :tableData="tableData" :currentTab="activeTab"/>
@@ -69,7 +69,7 @@
         <PledgorTable :tableData="tableData" :currentTab="activeTab"/>
       </el-tab-pane>
     </el-tabs>
-    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total"
+    <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total" :page_size="pageSize"
            @returnsliceData="accpetSliceData" class="pager"></Pager>
     <el-dialog title="添加客户" :visible.sync="dialogVisible" width="700px" @close="close_dialog()"
                :close-on-click-modal='false'>
@@ -222,15 +222,12 @@
         storageOptions: [],
         statusOption: [
           {value: '', label: '全部'},
-          {value: '0', label: '未完善'},
-          {value: '1', label: '待配置'},
-          {value: '2', label: '已完成'},
+          {value: 0, label: '未完善'},
+          {value: 1, label: '待配置'},
+          {value: 2, label: '已完成'},
         ],
         industry_options: [{label: '汽车', value: '0'}, {label: '机械设备', value: '1'}],
-        dataAll: {data: [], total: ''},
-        dataP1: {data: [], total: ''},
-        dataP2: {data: [], total: ''},
-        dataP3: {data: [], total: ''},
+        tableDataList: [],
       }
     },
     methods: {
@@ -244,17 +241,12 @@
           this.searchData.idCardNo = '';
         }
       },
-      search() {
-        let data = JSON.parse(JSON.stringify(this.searchData));
-        data.current = 1;
-        data.size = this.pageSize;
-        console.log(data);
-        this.init_data();
-        // this.$axios.post('baseInfo/customer/list', data).then((response) => {
-        //   this.currentPage = 1;
-        //   this.tableData = response.data.data.records;
-        //   this.total = response.data.data.totalSize;
-        // })
+      async search() {
+        // this.currentPage = 1;
+        this.tableDataList = [];
+        // this.activeTab = 'pane-0';
+        await this.init_data();
+        this.handleClick({'name': this.activeTab});
       },
       handleAvatarSuccess(res, file) {
         console.log('suc', res, file);
@@ -306,11 +298,13 @@
         console.log(this.customerFormData);
         this.$refs['customerFormData'].validate((valid) => {
           if (valid) {
-            this.$axios.post('baseInfo/customer/save', this.customerFormData).then((response) => {
+            this.$axios.post('baseInfo/customer/save', this.customerFormData).then(async (response) => {
               if (response.data.code === 200) {
                 this.dialogVisible = false;
                 if (this.addflag) {
-                  this.init_data();
+                  this.tableDataList = [];
+                  await this.init_data();
+                  this.handleClick({'name': this.activeTab});
                 }
               }
             });
@@ -319,26 +313,11 @@
           }
         })
       },
-      handleClick(tab, event) {
-        console.log(tab.name, event, this.activeTab);
-        // this.currentTab=tab.name;
-        if (tab.name === 'pane-1') {
-          this.tableData = this.dataP1.data;
-          this.total = this.dataP1.total;
-          // this.searchData.state = 0;
-        } else if (tab.name === 'pane-2') {
-          this.tableData = this.dataP2.data;
-          this.total = this.dataP2.total;
-          // this.searchData.state = 1;
-        } else if (tab.name === 'pane-3') {
-          this.tableData = this.dataP3.data;
-          this.total = this.dataP3.total;
-          // this.searchData.state = 2;
-        } else if (tab.name === 'pane-0') {
-          this.tableData = this.dataAll.data;
-          this.total = this.dataAll.total;
-          // this.searchData.state = '';
-        }
+      handleClick(tab) {
+        // console.log(tab.name, this.activeTab, this.tableDataList);
+        this.currentPage = 1;
+        this.tableData = this.tableDataList[parseInt(tab.name.split('-')[1])].data.slice(0, this.pageSize);
+        this.total = this.tableDataList[parseInt(tab.name.split('-')[1])].total;
       },
       get_storageOptions() {
         this.$axios.post('baseInfo/agency/storageList', {"current": 1, "size": 100}).then((response) => {
@@ -350,13 +329,14 @@
       accpetSliceData(data) { //接受分页器返回的数据
         this.currentPage = data.currentPage;
         this.pageSize = data.pageSize;
+        let state = parseInt(this.activeTab.split('-')[1]) - 1;
         this.$axios.post('baseInfo/customer/list',
-          { //全部
+          {
             "businessName": this.searchData.businessName,
             "mobile": this.searchData.mobile,
             "idCardNo": this.searchData.idCardNo,
             "warehouseId": this.searchData.warehouseId,
-            "state": this.searchData.state,
+            "state": state == -1 ? '' : state,
             "current": this.currentPage,
             "size": this.pageSize,
           }).then((response) => {
@@ -364,61 +344,34 @@
           this.total = response.data.data.totalSize;
         });
       },
-      init_data() {
-        this.$axios.post('baseInfo/customer/list',
-          { //全部
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
-            "state": '',
-            "current": this.currentPage,
-            "size": this.pageSize,
-          }).then((response) => {
-          this.dataAll.data = response.data.data.records;
-          this.dataAll.total = response.data.data.totalSize;
-          this.tableData = response.data.data.records;
-          this.total = response.data.data.totalSize;
-        });
-        this.$axios.post('baseInfo/customer/list',
-          { //待完善
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
-            "state": 0,
-            "current": this.currentPage,
-            "size": this.pageSize,
-          }).then((response) => {
-          this.dataP1.data = response.data.data.records;
-          this.dataP1.total = response.data.data.totalSize;
-        });
-        this.$axios.post('baseInfo/customer/list',
-          { //待完善
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
-            "state": 1,
-            "current": this.currentPage,
-            "size": this.pageSize,
-          }).then((response) => {
-          this.dataP2.data = response.data.data.records;
-          this.dataP2.total = response.data.data.totalSize;
-        });
-        this.$axios.post('baseInfo/customer/list',
-          { //待完善
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
-            "state": 2,
-            "current": this.currentPage,
-            "size": this.pageSize,
-          }).then((response) => {
-          this.dataP3.data = response.data.data.records;
-          this.dataP3.total = response.data.data.totalSize;
-        });
+      acceptRowData(rowData) {
+        console.log('ard', rowData);
+        this.customerFormData = JSON.parse(JSON.stringify(rowData));
+        this.dialogVisible = true;
+      },
+      async init_data() {
+        let stateList = [this.searchData.state, 0, 1, 2];
+        for (let i = 0; i < stateList.length; i++) {
+          await this.$axios.post('baseInfo/customer/list',
+            { //全部
+              "businessName": this.searchData.businessName,
+              "mobile": this.searchData.mobile,
+              "idCardNo": this.searchData.idCardNo,
+              "warehouseId": this.searchData.warehouseId,
+              "state": stateList[i],
+              "current": this.currentPage,
+              "size": 20,
+            }).then((response) => {
+            if (i === 0) {
+              this.tableData = response.data.data.records.slice(0, this.pageSize);
+              this.total = response.data.data.totalSize;
+            }
+            this.tableDataList.push({
+              'data': response.data.data.records,
+              'total': response.data.data.totalSize
+            });
+          });
+        }
       },
       select_industry(value) {
         // console.log(this.customerFormData);

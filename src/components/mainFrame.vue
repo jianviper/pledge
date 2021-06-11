@@ -19,7 +19,7 @@
 <script>
   import Header from './frame/header'
   import Aside from './frame/aside'
-  import TabPane from './tools/tabPane'
+  import TabPane from './parts/tabPane'
 
   export default {
     name: "mainFrame",

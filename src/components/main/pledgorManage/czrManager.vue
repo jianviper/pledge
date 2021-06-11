@@ -102,14 +102,13 @@
 </template>
 
 <script>
-  import config from '../../../config'
+  import config from '../../../../config'
 
   export default {
     name: "czrManager",
     props: ['drawerVisible', 'customerId'],
     data() {
       let checkMobile = (rule, value, callback) => {
-        console.log(value);
         if (!value) {
           return callback(new Error('手机号码不可为空'));
         } else if (!/^1(3|4|5|6|7|8)\d{9}$/.test(value)) {
@@ -168,7 +167,6 @@
       uploadImgHead(param) {
         let formData = new FormData();
         formData.append('image', param.file);
-        console.log(param);
         this.$refs['czrFormData'].clearValidate('idCardNationalUrl');
         this.$axios.post('thirdparty/file/uploadImg', formData).then((response) => {
           this.idCardImgHead = URL.createObjectURL(param.file);
@@ -204,9 +202,8 @@
         console.log(index, rowData);
         this.czrFormData = JSON.parse(JSON.stringify(rowData));
         let host = process.env.NODE_ENV == 'test' ? config.test.proxyTable["/api"].target + 'api' : config.dev.proxyTable["/api"].target + 'api';
-        console.log('eeed', this.czrFormData);
         await this.$axios.get('baseInfo/pledgor/info/' + rowData.id).then((response) => {
-          console.log('rrr', response.data.data);
+          // console.log('rrr', response.data.data);
           this.czrFormData['idCardNationalUrl'] = response.data.data.idCardNationalUrl;
           this.czrFormData['idCardPortraiUrlt'] = response.data.data.idCardPortraiUrlt;
           this.idCardImgHead = host + response.data.data.idCardNationalUrl;

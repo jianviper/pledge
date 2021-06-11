@@ -50,15 +50,15 @@
     },
     watch: {
       currentPage(val, oldVal) {
-        console.log('watch current', val);
+        // console.log('watch current', val);
         this.current_page = val;
       },
       totalSize(val, oldVal) {
-        console.log('watch totalSize', val);
+        // console.log('watch totalSize', val);
         this.total = val;
       },
       page_size(val, oldVal) {
-        console.log('watch pageSize', val);
+        // console.log('watch pageSize', val);
         this.pageSize = val;
       }
     },

@@ -58,8 +58,8 @@
       initTab() { //如果是刷新，加载的时候初始化刷新前的tab页
         console.log('tab', new Date().getTime());
         if (sessionStorage.getItem('currentTab')) {
-          console.log(sessionStorage.getItem('currentTab'));
-          console.log(this.$route);
+          // console.log(sessionStorage.getItem('currentTab'));
+          // console.log(this.$route);
           this.$store.commit('addTab', {
             title: JSON.parse(sessionStorage.getItem('currentTab')).title,
             ref: this.$route.path

@@ -46,31 +46,49 @@
       </el-table-column>
     </el-table>
     <czr-manager :drawerVisible="czrDrawerVisible" :customerId="customerId"/>
+    <ProcessConfig :drawerVisible="proConVisible" :rowData="rowdata"/>
   </div>
 </template>
 
 <script>
-  import Pager from '../tools/Pager'
-  import czrManager from '../tools/czrManager'
+  import Pager from '../../parts/Pager'
+  import czrManager from './czrManager'
+  import ProcessConfig from './processConfig'
+
 
   export default {
     name: "pledgorTable",
     props: ['tableData', 'currentTab'],
-    components: {Pager, czrManager},
+    components: {Pager, czrManager, ProcessConfig},
     data() {
       return {
         czrDrawerVisible: false,
+        proConVisible: false,
         customerId: '',
+        rowdata: {},
       }
     },
     methods: {
-      pledgorMgt(index, rowData) {
-        this.czrDrawerVisible = new Date().getTime();
+      configureProcess(index, rowData) {
+        this.proConVisible = new Date().getTime();
         this.customerId = rowData.id;
       },
-      improveCustomer(index, rowData) {
-        console.log(rowData);
-        this.$emit('returnRowData', rowData);
+      pledgorMgt(index, rowData) {
+        this.czrDrawerVisible = new Date().getTime();
+        this.rowdata = JSON.parse(JSON.stringify(rowData));
+      },
+      async improveCustomer(index, rowData) { //完善客户
+        let rd = JSON.parse(JSON.stringify(rowData));
+        await this.$axios.get('baseInfo/customer/info/' + rowData.id).then((response) => {
+          // console.log('resp', response.data.data);
+          rd.address = response.data.data.businessVo.address;
+          rd.years = response.data.data.businessVo.years;
+          rd.idCardNationalUrl = response.data.data.idCardNationalUrl ? response.data.data.idCardNationalUrl : '';
+          rd.idCardPortraiUrlt = response.data.data.idCardPortraiUrlt ? response.data.data.idCardPortraiUrlt : '';
+          rd.licenseUrl = response.data.data.businessVo.licenseUrl ? response.data.data.businessVo.licenseUrl : '';
+        });
+        console.log('improve', rd);
+        this.$emit('returnRowData', rd);
       }
     }
 

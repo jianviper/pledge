@@ -82,7 +82,7 @@
 </template>
 
 <script>
-  import Pager from '../../tools/Pager'
+  import Pager from '../../parts/Pager'
 
   export default {
     name: "searchAndTable",

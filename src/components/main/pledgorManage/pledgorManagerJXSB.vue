@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!--    start---搜索-->
     <el-row>
       <el-col :span="8">
         <el-col :span="8"><label for="businessName">公司</label></el-col>
@@ -55,6 +56,8 @@
         <el-button icon="el-icon-circle-plus-outline" type="primary" @click="add">添加</el-button>
       </el-col>
     </el-row>
+    <!--    end---搜索-->
+    <!--    start---标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="全部" name="pane-0">
         <PledgorTable :tableData="tableData" :currentTab="activeTab" @returnRowData="acceptRowData"/>
@@ -69,13 +72,18 @@
         <PledgorTable :tableData="tableData" :currentTab="activeTab"/>
       </el-tab-pane>
     </el-tabs>
+    <!--    end---标签页-->
+    <!--    start---分页器-->
     <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total" :page_size="pageSize"
            @returnsliceData="accpetSliceData" class="pager"></Pager>
+    <!--    end---分页器-->
+    <!--    start---添加/修改客户弹窗-->
     <el-dialog title="添加客户" :visible.sync="dialogVisible" width="700px" @close="close_dialog()"
                :close-on-click-modal='false'>
       <h1 style="text-align: left;">客户基本信息</h1>
       <el-divider style="margin:10px auto"></el-divider>
-      <el-form :model="customerFormData" ref="customerFormData" label-width="100px"
+      <!--    start---添加/修改客户表单-->
+      <el-form :model="customerFormData" ref="customerFormData" label-width="100px" :rules="rules"
                class="customerForm">
         <el-row>
           <el-col :span="12">
@@ -189,22 +197,34 @@
           </el-col>
         </el-row>
       </el-form>
+      <!--    end---添加/修改客户表单-->
       <span slot="footer" class="dialog-footer">
         <el-button @click="close_dialog()">取 消</el-button>
         <el-button type="primary" @click="add_submit">确 定</el-button>
       </span>
     </el-dialog>
+    <!--    end---添加/修改客户弹窗-->
   </div>
 </template>
 
 <script>
-  import PledgorTable from '../tools/pledgorTable'
-  import Pager from '../tools/Pager'
+  import PledgorTable from './pledgorTable'
+  import Pager from '../../parts/Pager'
+  import config from '../../../../config'
 
   export default {
     name: "pledgorManagerJXSB",
     components: {PledgorTable, Pager},
     data() {
+      let checkMobile = (rule, value, callback) => {
+        if (!value) {
+          return callback(new Error('手机号码不可为空'));
+        } else if (!/^1(3|4|5|6|7|8)\d{9}$/.test(value)) {
+          return callback(new Error('手机号码格式不正确'));
+        } else {
+          callback();
+        }
+      };
       return {
         addflag: true,
         dialogVisible: false,
@@ -226,8 +246,12 @@
           {value: 1, label: '待配置'},
           {value: 2, label: '已完成'},
         ],
-        industry_options: [{label: '汽车', value: '0'}, {label: '机械设备', value: '1'}],
+        industry_options: [{label: '汽车', value: 0}, {label: '机械设备', value: 1}],
         tableDataList: [],
+        rules: {
+          name: {required: true, message: '请输入客户姓名', trigger: 'blur'},
+          mobile: {required: true, validator: checkMobile, trigger: 'blur'},
+        }
       }
     },
     methods: {
@@ -244,9 +268,8 @@
       async search() {
         // this.currentPage = 1;
         this.tableDataList = [];
-        // this.activeTab = 'pane-0';
         await this.init_data();
-        this.handleClick({'name': this.activeTab});
+        // this.handleClick({'name': this.activeTab});
       },
       handleAvatarSuccess(res, file) {
         console.log('suc', res, file);
@@ -264,7 +287,7 @@
         }
         return isJPG && isLt2M;
       },
-      uploadImgHead(param) {
+      uploadImgHead(param) { //身份证正面
         let formData = new FormData();
         formData.append('image', param.file);
         // console.log(param, formData.get('image'));
@@ -273,7 +296,7 @@
           this.customerFormData.idCardNationalUrl = response.data.data;
         })
       },
-      uploadImgBack(param) {
+      uploadImgBack(param) { //身份证反面
         let formData = new FormData();
         formData.append('image', param.file);
         // console.log(param, formData.get('image'));
@@ -282,7 +305,7 @@
           this.customerFormData.idCardPortraiUrlt = response.data.data;
         })
       },
-      uploadImgLicense(param) {
+      uploadImgLicense(param) { //营业执照照片
         let formData = new FormData();
         formData.append('image', param.file);
         // console.log(param, formData.get('image'));
@@ -294,7 +317,7 @@
       add() {
         this.dialogVisible = true;
       },
-      add_submit() {
+      add_submit() { //添加/修改客户提交
         console.log(this.customerFormData);
         this.$refs['customerFormData'].validate((valid) => {
           if (valid) {
@@ -304,7 +327,6 @@
                 if (this.addflag) {
                   this.tableDataList = [];
                   await this.init_data();
-                  this.handleClick({'name': this.activeTab});
                 }
               }
             });
@@ -336,7 +358,7 @@
             "mobile": this.searchData.mobile,
             "idCardNo": this.searchData.idCardNo,
             "warehouseId": this.searchData.warehouseId,
-            "state": state == -1 ? '' : state,
+            "state": state === -1 ? '' : state,
             "current": this.currentPage,
             "size": this.pageSize,
           }).then((response) => {
@@ -344,12 +366,16 @@
           this.total = response.data.data.totalSize;
         });
       },
-      acceptRowData(rowData) {
-        console.log('ard', rowData);
+      acceptRowData(rowData) { //接受完善客户点击后传来的表格行数据
         this.customerFormData = JSON.parse(JSON.stringify(rowData));
+        let host = process.env.NODE_ENV == 'test' ? config.test.proxyTable["/api"].target + 'api' : config.dev.proxyTable["/api"].target + 'api';
+        this.customerFormData.idCardNationalUrl ? this.idCardImgHead = host + this.customerFormData.idCardNationalUrl : 0;
+        this.customerFormData.idCardPortraiUrlt ? this.idCardImgBack = host + this.customerFormData.idCardPortraiUrlt : 0;
+        this.customerFormData.licenseUrl ? this.imgLicenseUrl = host + this.customerFormData.licenseUrl : 0;
         this.dialogVisible = true;
+        console.log('accRD', this.customerFormData);
       },
-      async init_data() {
+      async init_data() { //初始化数据
         let stateList = [this.searchData.state, 0, 1, 2];
         for (let i = 0; i < stateList.length; i++) {
           await this.$axios.post('baseInfo/customer/list',
@@ -362,16 +388,19 @@
               "current": this.currentPage,
               "size": 20,
             }).then((response) => {
-            if (i === 0) {
-              this.tableData = response.data.data.records.slice(0, this.pageSize);
-              this.total = response.data.data.totalSize;
-            }
-            this.tableDataList.push({
+            // if (i === 0) { //初始化第一个标签页的表格数据
+            //   this.tableData = response.data.data.records.slice(0, this.pageSize);
+            //   this.total = response.data.data.totalSize;
+            // }
+            this.tableDataList.push({ //将多个标签页的表格数据放到数组中
               'data': response.data.data.records,
               'total': response.data.data.totalSize
             });
           });
         }
+        //初始化第一个标签页的表格数据
+        this.tableData = this.tableDataList[parseInt(this.activeTab.split('-')[1])].data.slice(0, this.pageSize);
+        this.total = this.tableDataList[parseInt(this.activeTab.split('-')[1])].total;
       },
       select_industry(value) {
         // console.log(this.customerFormData);
@@ -379,6 +408,7 @@
       close_dialog() {
         this.dialogVisible = false;
         this.$refs['customerFormData'].resetFields();
+        this.customerFormData = {};
         this.imgLicenseUrl = '';
         this.idCardImgHead = '';
         this.idCardImgBack = '';

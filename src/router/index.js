@@ -21,7 +21,7 @@ arr.push(
     component: HelloWorld
   },
 );
-console.log('index.router', arr);
+// console.log('index.router', arr);
 export default new Router({
   routes: [
     {

@@ -323,10 +323,14 @@
           if (valid) {
             this.$axios.post('baseInfo/customer/save', this.customerFormData).then(async (response) => {
               if (response.data.code === 200) {
+                this.$message({
+                  type: 'success',
+                  message: '提交成功!'
+                });
                 this.dialogVisible = false;
                 if (this.addflag) {
                   this.tableDataList = [];
-                  await this.init_data();
+                  this.init_data();
                 }
               }
             });

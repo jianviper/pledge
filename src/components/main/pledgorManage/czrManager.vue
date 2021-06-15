@@ -1,9 +1,5 @@
 <template>
   <div class="drawer_wrap">
-    <!--    <el-dialog title="出质人管理" :visible.sync="dialogVisible" width="700px" @close="close_dialog()"-->
-    <!--               :close-on-click-modal='false'>-->
-    <!--      <el-button>添加出质人</el-button>-->
-    <!--    </el-dialog>-->
     <el-drawer
       title="出质人管理"
       :visible.sync="czrDrawerVisible"

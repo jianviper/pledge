@@ -70,8 +70,10 @@
     },
     methods: {
       configureProcess(index, rowData) {
+        console.log(index, rowData);
         this.proConVisible = new Date().getTime();
         this.customerId = rowData.id;
+        this.rowdata = JSON.parse(JSON.stringify(rowData));
       },
       pledgorMgt(index, rowData) {
         this.czrDrawerVisible = new Date().getTime();

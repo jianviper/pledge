@@ -377,7 +377,7 @@
         this.customerFormData.idCardPortraiUrlt ? this.idCardImgBack = host + this.customerFormData.idCardPortraiUrlt : 0;
         this.customerFormData.licenseUrl ? this.imgLicenseUrl = host + this.customerFormData.licenseUrl : 0;
         this.dialogVisible = true;
-        console.log('accRD', this.customerFormData);
+        // console.log('accRD', this.customerFormData);
       },
       async init_data() { //初始化数据
         let stateList = [this.searchData.state, 0, 1, 2];

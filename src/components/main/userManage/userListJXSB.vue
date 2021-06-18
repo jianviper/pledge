@@ -171,6 +171,7 @@
       };
       return {
         addflag: true,
+        searchFlag: false,
         dialogVisible: false,
         setRoleVisible: false,
         setStroageVisible: false,
@@ -366,11 +367,11 @@
       init_data() {
         this.$axios.post('baseInfo/user/list',
           {
-            "name": this.searchData.name,
-            "mobile": this.searchData.mobile,
-            "agencyId": this.searchData.agencyId,
-            "storageId": this.searchData.storageId,
-            "state": this.searchData.state,
+            "name": this.searchFlag ? this.searchData.name : '',
+            "mobile": this.searchFlag ? this.searchData.mobile : '',
+            "agencyId": this.searchFlag ? this.searchData.agencyId : '',
+            "storageId": this.searchFlag ? this.searchData.storageId : '',
+            "state": this.searchFlag ? this.searchData.state : '',
             "current": this.currentPage,
             "size": this.pageSize,
           }).then((response) => {
@@ -383,6 +384,7 @@
         data.current = 1;
         data.size = this.pageSize;
         this.$axios.post('baseInfo/user/list', data).then((response) => {
+          this.searchFlag = true;
           this.currentPage = 1;
           this.tableData = response.data.data.records;
           this.total = response.data.data.totalSize;

@@ -103,6 +103,7 @@
           {value: '1', label: '失效'},
         ],
         tableData: [], //表格原始数据
+        searchFlag: false,
       }
     },
     methods: {
@@ -119,6 +120,7 @@
           "current": 1,
           "size": this.pageSize
         }).then((response) => {
+          this.searchFlag = true;
           this.timer = new Date().getTime();
           this.currentPage = 1;
           this.tableData = response.data.data.records;
@@ -128,9 +130,9 @@
       getAgencyData() { //获取初始化表格数据
         // console.log(new Date().getTime());
         this.$axios.post(this.listUrl, {
-          "name": this.name,
-          "agencyNumber": this.code,
-          "state": this.statusValue,
+          "name": this.searchFlag ? this.name : '',
+          "agencyNumber": this.searchFlag ? this.code : '',
+          "state": this.searchFlag ? this.statusValue : '',
           "current": this.currentPage,
           "size": this.pageSize
         }).then((response) => {

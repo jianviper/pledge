@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!--    start---搜索-->
+    <!--    start-搜索-->
     <el-row>
       <el-col :span="8">
         <el-col :span="8"><label for="businessName">公司</label></el-col>
@@ -41,28 +41,29 @@
       </el-col>
       <el-col :span="8">
         <el-button icon="el-icon-search" type="primary" @click="search">查询</el-button>
-        <el-button icon="el-icon-circle-plus-outline" type="primary" @click="add">添加</el-button>
       </el-col>
     </el-row>
-    <!--    end---搜索-->
-    <!--    start---标签页-->
+    <!--    end-搜索-->
+    <!--    start-标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="已授信" name="pane-0">
-        <LoanAlreadyTable :tableData="LoanAlreadyTableData" :currentTab="activeTab"/>
-        <!--    start---分页器-->
+        <LoanAlreadyTable :tableData="LoanAlreadyTableData" :currentTab="activeTab"
+                          @returnLoanAlreadyTable="accpetLoanAlreadyTable"/>
+        <!--    start-分页器-->
         <Pager :dataList="LoanAlreadyTableData" :currentPage="currentPage" :totalSize="total[0]" :page_size="pageSize"
                @returnsliceData="accpetAlreadySliceData" class="pager"></Pager>
-        <!--    end---分页器-->
+        <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="待授信" name="pane-1">
-        <LoanWaitTable :tableData="LoanWaitTableData" :currentTab="activeTab"/>
-        <!--    start---分页器-->
+        <LoanWaitTable :tableData="LoanWaitTableData" :currentTab="activeTab"
+                       @returnLoanWaitTable="accpetLoanWaitTable"/>
+        <!--    start-分页器-->
         <Pager :dataList="LoanWaitTableData" :currentPage="currentPage" :totalSize="total[1]" :page_size="pageSize"
                @returnsliceData="accpetWaitSliceData" class="pager"></Pager>
-        <!--    end---分页器-->
+        <!--    end-分页器-->
       </el-tab-pane>
     </el-tabs>
-    <!--    end---标签页-->
+    <!--    end-标签页-->
 
   </div>
 </template>
@@ -78,6 +79,7 @@
     components: {LoanAlreadyTable, LoanWaitTable, Pager},
     data() {
       return {
+        searchFlag: false,
         searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
         storageOptions: [],
         LoanAlreadyTableData: [],
@@ -101,10 +103,11 @@
         }
       },
       search() {
-        console.log(this.searchData);
-      },
-      add() {
-
+        // console.log(this.searchData);
+        this.searchFlag = true;
+        this.currentPage = 1;
+        this.alreadyCreditData_init(this.pageSize);
+        this.waitCreditData_init(this.pageSize);
       },
       storage_init() {
         this.$axios.post('baseInfo/agency/storageList', {"current": 1, "size": 100}).then((response) => {
@@ -119,27 +122,24 @@
       async alreadyCreditData_init(pageSize = 20) {
         await this.$axios.post('search/credit_aggregation/alreadyCreditList',
           { //全部
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
+            "businessName": this.searchFlag ? this.searchData.businessName : '',
+            "mobile": this.searchFlag ? this.searchData.mobile : '',
+            "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
+            "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {
           this.LoanAlreadyTableData = response.data.data.records.slice(0, this.pageSize);
           this.total[0] = response.data.data.totalSize;
         })
-        //初始化第一个标签页的表格数据
-        // this.tableData = this.tableDataList[parseInt(this.activeTab.split('-')[1])].data.slice(0, this.pageSize);
-        // this.total = this.tableDataList[parseInt(this.activeTab.split('-')[1])].total;
       },
       async waitCreditData_init(pageSize = 20) {
         await this.$axios.post('search/credit_aggregation/waitCreditList',
           { //全部
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
+            "businessName": this.searchFlag ? this.searchData.businessName : '',
+            "mobile": this.searchFlag ? this.searchData.mobile : '',
+            "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
+            "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {
@@ -155,11 +155,21 @@
         this.pageSize = data.pageSize;
         this.alreadyCreditData_init(this.pageSize);
       },
+      accpetLoanAlreadyTable(data) {
+        if (data) {
+          this.alreadyCreditData_init(this.pageSize);
+        }
+      },
       accpetWaitSliceData(data) {
         this.currentPage = data.currentPage;
         this.pageSize = data.pageSize;
         this.waitCreditData_init(this.pageSize);
       },
+      accpetLoanWaitTable(data) {
+        if (data) {
+          this.waitCreditData_init(this.pageSize);
+        }
+      }
     },
     mounted() {
       this.storage_init();

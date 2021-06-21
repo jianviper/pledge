@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!--    start---搜索-->
+    <!--    start-搜索-->
     <el-row>
       <el-col :span="8">
         <el-col :span="8"><label for="businessName">公司</label></el-col>
@@ -56,8 +56,8 @@
         <el-button icon="el-icon-circle-plus-outline" type="primary" @click="add">添加</el-button>
       </el-col>
     </el-row>
-    <!--    end---搜索-->
-    <!--    start---标签页-->
+    <!--    end-搜索-->
+    <!--    start-标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="全部" name="pane-0">
         <PledgorTable :tableData="tableData" :currentTab="activeTab" @returnRowData="acceptRowData"/>
@@ -72,17 +72,17 @@
         <PledgorTable :tableData="tableData" :currentTab="activeTab"/>
       </el-tab-pane>
     </el-tabs>
-    <!--    end---标签页-->
-    <!--    start---分页器-->
+    <!--    end-标签页-->
+    <!--    start-分页器-->
     <Pager :dataList="tableData" :currentPage="currentPage" :totalSize="total" :page_size="pageSize"
            @returnsliceData="accpetSliceData" class="pager"></Pager>
-    <!--    end---分页器-->
-    <!--    start---添加/修改客户弹窗-->
+    <!--    end-分页器-->
+    <!--    start-添加/修改客户弹窗-->
     <el-dialog title="添加客户" :visible.sync="dialogVisible" width="700px" @close="close_dialog()"
                :close-on-click-modal='false'>
       <h1 style="text-align: left;">客户基本信息</h1>
       <el-divider style="margin:10px auto"></el-divider>
-      <!--    start---添加/修改客户表单-->
+      <!--    start-添加/修改客户表单-->
       <el-form :model="customerFormData" ref="customerFormData" label-width="100px" :rules="rules"
                class="customerForm">
         <el-row>
@@ -197,13 +197,13 @@
           </el-col>
         </el-row>
       </el-form>
-      <!--    end---添加/修改客户表单-->
+      <!--    end-添加/修改客户表单-->
       <span slot="footer" class="dialog-footer">
         <el-button @click="close_dialog()">取 消</el-button>
         <el-button type="primary" @click="add_submit">确 定</el-button>
       </span>
     </el-dialog>
-    <!--    end---添加/修改客户弹窗-->
+    <!--    end-添加/修改客户弹窗-->
   </div>
 </template>
 
@@ -227,6 +227,7 @@
       };
       return {
         addflag: true,
+        searchFlag: false,
         dialogVisible: false,
         customerFormData: {},
         activeTab: 'pane-0',
@@ -265,10 +266,11 @@
           this.searchData.idCardNo = '';
         }
       },
-      async search() {
-        // this.currentPage = 1;
+      search() {
+        this.currentPage = 1;
+        this.searchFlag = true;
         this.tableDataList = [];
-        await this.init_data();
+        this.init_data();
         // this.handleClick({'name': this.activeTab});
       },
       handleAvatarSuccess(res, file) {
@@ -358,10 +360,10 @@
         let state = parseInt(this.activeTab.split('-')[1]) - 1;
         this.$axios.post('baseInfo/customer/list',
           {
-            "businessName": this.searchData.businessName,
-            "mobile": this.searchData.mobile,
-            "idCardNo": this.searchData.idCardNo,
-            "warehouseId": this.searchData.warehouseId,
+            "businessName": this.searchFlag ? this.searchData.businessName : '',
+            "mobile": this.searchFlag ? this.searchData.mobile : '',
+            "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
+            "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
             "state": state === -1 ? '' : state,
             "current": this.currentPage,
             "size": this.pageSize,
@@ -384,10 +386,10 @@
         for (let i = 0; i < stateList.length; i++) {
           await this.$axios.post('baseInfo/customer/list',
             { //全部
-              "businessName": this.searchData.businessName,
-              "mobile": this.searchData.mobile,
-              "idCardNo": this.searchData.idCardNo,
-              "warehouseId": this.searchData.warehouseId,
+              "businessName": this.searchFlag ? this.searchData.businessName : '',
+              "mobile": this.searchFlag ? this.searchData.mobile : '',
+              "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
+              "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
               "state": stateList[i],
               "current": this.currentPage,
               "size": 20,

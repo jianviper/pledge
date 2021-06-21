@@ -37,6 +37,7 @@
       </el-table-column>
     </el-table>
     <AssetViewDrawer :assetDrawer="assetDrawerFlag" :rowData="rowdata"/>
+
   </div>
 </template>
 
@@ -51,6 +52,7 @@
       return {
         assetDrawerFlag: false,
         proConVisible: false,
+        creditAmountVisible: false,
         customerId: '',
         rowdata: {},
       }
@@ -61,10 +63,35 @@
         this.assetDrawerFlag = new Date().getTime();
       },
       modfiyCreditAmount(index, rowData) {
-
+        this.$prompt('授信金额', '修改', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputValue: rowData.creditLines,
+          inputPattern: /^[0-9]+(\.[0-9]{1,2})?$/,
+          inputErrorMessage: '只能输入数字(保留两位小数)',
+        }).then(({value}) => {
+          // console.log(value, rowData);
+          this.$axios.post('carloan/credit/update_credit_lines', {
+            'businessId': rowData.businessId,
+            'creditLines': value
+          }).then((response) => {
+            if (response.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '修改成功'
+              });
+              this.$emit('returnLoanAlreadyTable', true);
+            } else {
+              this.$message({
+                type: 'error',
+                message: response.data.message
+              });
+            }
+          })
+        })
       },
       digitalCAView(index, rowData) {
-
+        this.$message('暂未开放');
       },
     }
 

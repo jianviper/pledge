@@ -64,7 +64,7 @@
         done();
       },
       async search() {
-        console.log(this.searchData, this.rowData);
+        // console.log(this.searchData, this.rowData);
         await this.$axios.post('carloan/assets/findAllPledgeListByCustomerIdInLoan', {
           "customerId": this.rowData.customerId,
           "name": this.searchData.name,
@@ -78,7 +78,7 @@
     },
     watch: {
       assetDrawer(val, oldVal) {
-        console.log(this.rowData);
+        // console.log(this.rowData);
         this.assetDrawerVisible = true;
         this.search();
       }

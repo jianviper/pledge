@@ -47,16 +47,14 @@
     <!--    start-标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="已授信" name="pane-0">
-        <LoanAlreadyTable :tableData="LoanAlreadyTableData" :currentTab="activeTab"
-                          @returnLoanAlreadyTable="accpetLoanAlreadyTable"/>
+        <LoanAlreadyTable :tableData="LoanAlreadyTableData" @returnLoanAlreadyTable="accpetLoanAlreadyTable"/>
         <!--    start-分页器-->
         <Pager :dataList="LoanAlreadyTableData" :currentPage="currentPage" :totalSize="total[0]" :page_size="pageSize"
                @returnsliceData="accpetAlreadySliceData" class="pager"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="待授信" name="pane-1">
-        <LoanWaitTable :tableData="LoanWaitTableData" :currentTab="activeTab"
-                       @returnLoanWaitTable="accpetLoanWaitTable"/>
+        <LoanWaitTable :tableData="LoanWaitTableData" @returnLoanWaitTable="accpetLoanWaitTable"/>
         <!--    start-分页器-->
         <Pager :dataList="LoanWaitTableData" :currentPage="currentPage" :totalSize="total[1]" :page_size="pageSize"
                @returnsliceData="accpetWaitSliceData" class="pager"></Pager>
@@ -79,8 +77,8 @@
     components: {LoanAlreadyTable, LoanWaitTable, Pager},
     data() {
       return {
-        searchFlag: false,
         searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
+        pagingData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
         storageOptions: [],
         LoanAlreadyTableData: [],
         LoanWaitTableData: [],
@@ -104,8 +102,8 @@
       },
       search() {
         // console.log(this.searchData);
-        this.searchFlag = true;
         this.currentPage = 1;
+        this.pagingData=JSON.parse(JSON.stringify(this.searchData));
         this.alreadyCreditData_init(this.pageSize);
         this.waitCreditData_init(this.pageSize);
       },
@@ -118,14 +116,16 @@
       handleClick(tab) {
         // console.log(tab.name, this.activeTab, this.tableDataList);
         this.currentPage = 1;
+        this.alreadyCreditData_init(this.pageSize);
+        this.waitCreditData_init(this.pageSize);
       },
       async alreadyCreditData_init(pageSize = 20) {
         await this.$axios.post('search/credit_aggregation/alreadyCreditList',
           { //全部
-            "businessName": this.searchFlag ? this.searchData.businessName : '',
-            "mobile": this.searchFlag ? this.searchData.mobile : '',
-            "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
-            "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
+            "businessName": this.pagingData.businessName,
+            "mobile": this.pagingData.mobile,
+            "idCardNo": this.pagingData.idCardNo,
+            "warehouseId": this.pagingData.warehouseId,
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {
@@ -136,10 +136,10 @@
       async waitCreditData_init(pageSize = 20) {
         await this.$axios.post('search/credit_aggregation/waitCreditList',
           { //全部
-            "businessName": this.searchFlag ? this.searchData.businessName : '',
-            "mobile": this.searchFlag ? this.searchData.mobile : '',
-            "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
-            "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
+            "businessName": this.pagingData.businessName,
+            "mobile": this.pagingData.mobile,
+            "idCardNo": this.pagingData.idCardNo,
+            "warehouseId": this.pagingData.warehouseId,
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {

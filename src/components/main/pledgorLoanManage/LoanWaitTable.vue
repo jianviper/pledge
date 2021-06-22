@@ -58,7 +58,7 @@
 
   export default {
     name: "LoanWaitTable",
-    props: ['tableData', 'currentTab'],
+    props: ['tableData'],
     components: {},
     data() {
       return {

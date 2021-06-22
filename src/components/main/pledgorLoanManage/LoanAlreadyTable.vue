@@ -46,7 +46,7 @@
 
   export default {
     name: "LoanAlreadyTable",
-    props: ['tableData', 'currentTab'],
+    props: ['tableData'],
     components: {AssetViewDrawer},
     data() {
       return {
@@ -94,7 +94,6 @@
         this.$message('暂未开放');
       },
     }
-
   }
 </script>
 

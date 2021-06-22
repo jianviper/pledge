@@ -4,7 +4,7 @@
       <el-col :span="6">
         <el-col :span="6"><label for="name">机构名称</label></el-col>
         <el-col :span="16">
-          <el-input id="name" placeholder="模糊匹配" v-model="name">
+          <el-input id="name" placeholder="模糊匹配" v-model="searchData.name">
             <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
           </el-input>
         </el-col>
@@ -12,7 +12,7 @@
       <el-col :span="6">
         <el-col :span="6"><label for="code">机构代码</label></el-col>
         <el-col :span="16">
-          <el-input id="code" placeholder="机构代码" v-model="code">
+          <el-input id="code" placeholder="机构代码" v-model="searchData.code">
             <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
           </el-input>
         </el-col>
@@ -20,7 +20,7 @@
       <el-col :span="6">
         <el-col :span="6"><label for="">状态</label></el-col>
         <el-col :span="18" class="select_wrap">
-          <el-select v-model="statusValue">
+          <el-select v-model="searchData.statusValue">
             <el-option v-for="option in statusOption"
                        :key="option.value"
                        :label="option.label"
@@ -91,19 +91,17 @@
     data() {
       return {
         timer: '',
-        name: '',
-        code: '',
+        searchData: {name: '', code: '', state: ''},
         currentPage: 1,
         pageSize: 10,
         total: 0,
-        statusValue: '',
         statusOption: [
           {value: '', label: '全部'},
           {value: '0', label: '正常'},
           {value: '1', label: '失效'},
         ],
         tableData: [], //表格原始数据
-        searchFlag: false,
+        pagingData: {name: '', code: '', state: ''},
       }
     },
     methods: {
@@ -113,26 +111,17 @@
       },
       search() {
         // console.log(this.name, this.code, this.statusValue);
-        this.$axios.post(this.listUrl, {
-          "name": this.name,
-          "agencyNumber": this.code,
-          "state": this.statusValue,
-          "current": 1,
-          "size": this.pageSize
-        }).then((response) => {
-          this.searchFlag = true;
-          this.timer = new Date().getTime();
-          this.currentPage = 1;
-          this.tableData = response.data.data.records;
-          this.total = response.data.data.totalSize;
-        })
+        this.pagingData = JSON.parse(JSON.stringify(this.searchData));
+        this.currentPage = 1;
+        this.getAgencyData();
+        // this.timer = new Date().getTime();
       },
       getAgencyData() { //获取初始化表格数据
         // console.log(new Date().getTime());
         this.$axios.post(this.listUrl, {
-          "name": this.searchFlag ? this.name : '',
-          "agencyNumber": this.searchFlag ? this.code : '',
-          "state": this.searchFlag ? this.statusValue : '',
+          "name": this.pagingData.name,
+          "agencyNumber": this.pagingData.code,
+          "state": this.pagingData.state,
           "current": this.currentPage,
           "size": this.pageSize
         }).then((response) => {
@@ -153,9 +142,9 @@
       iconClick(ev) {
         let ele_id = ev.path[3].getElementsByTagName('input')[0].id;
         if (ele_id === 'name') {
-          this.name = '';
+          this.searchData.name = '';
         } else if (ele_id === 'code') {
-          this.code = '';
+          this.searchData.code = '';
         }
       },
     },

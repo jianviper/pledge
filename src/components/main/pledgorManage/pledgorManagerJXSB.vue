@@ -227,7 +227,6 @@
       };
       return {
         addflag: true,
-        searchFlag: false,
         dialogVisible: false,
         customerFormData: {},
         activeTab: 'pane-0',
@@ -239,6 +238,7 @@
         imgLicenseUrl: '',//营业执照照片
         imgHeader: {'Authorization': sessionStorage.getItem('token')},
         searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: '', state: ''},
+        pagingData: {businessName: '', mobile: '', idCardNo: '', warehouseId: '', state: ''},
         tableData: [],//用于切换标签页区分用的表格数据
         storageOptions: [],
         statusOption: [
@@ -268,8 +268,8 @@
       },
       search() {
         this.currentPage = 1;
-        this.searchFlag = true;
         this.tableDataList = [];
+        this.pagingData = JSON.parse(JSON.stringify(this.searchData));
         this.init_data();
         // this.handleClick({'name': this.activeTab});
       },
@@ -360,10 +360,10 @@
         let state = parseInt(this.activeTab.split('-')[1]) - 1;
         this.$axios.post('baseInfo/customer/list',
           {
-            "businessName": this.searchFlag ? this.searchData.businessName : '',
-            "mobile": this.searchFlag ? this.searchData.mobile : '',
-            "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
-            "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
+            "businessName": this.pagingData.businessName,
+            "mobile": this.pagingData.mobile,
+            "idCardNo": this.pagingData.idCardNo,
+            "warehouseId": this.pagingData.warehouseId,
             "state": state === -1 ? '' : state,
             "current": this.currentPage,
             "size": this.pageSize,
@@ -382,14 +382,14 @@
         // console.log('accRD', this.customerFormData);
       },
       async init_data() { //初始化数据
-        let stateList = [this.searchData.state, 0, 1, 2];
+        let stateList = [this.pagingData.state, 0, 1, 2];
         for (let i = 0; i < stateList.length; i++) {
           await this.$axios.post('baseInfo/customer/list',
             { //全部
-              "businessName": this.searchFlag ? this.searchData.businessName : '',
-              "mobile": this.searchFlag ? this.searchData.mobile : '',
-              "idCardNo": this.searchFlag ? this.searchData.idCardNo : '',
-              "warehouseId": this.searchFlag ? this.searchData.warehouseId : '',
+              "businessName": this.pagingData.businessName,
+              "mobile": this.pagingData.mobile,
+              "idCardNo": this.pagingData.idCardNo,
+              "warehouseId": this.pagingData.warehouseId,
               "state": stateList[i],
               "current": this.currentPage,
               "size": 20,

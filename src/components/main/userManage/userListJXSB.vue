@@ -176,6 +176,7 @@
         setRoleVisible: false,
         setStroageVisible: false,
         searchData: {name: '', mobile: '', agencyId: '', storageId: '', state: ''},
+        pagingData: {name: '', mobile: '', agencyId: '', storageId: '', state: ''},
         agencyOption: [], //添加和修改界面的所属机构选项
         agencyOptions: [], //所属机构
         storageOption: [], //监管仓配置选项
@@ -367,11 +368,11 @@
       init_data() {
         this.$axios.post('baseInfo/user/list',
           {
-            "name": this.searchFlag ? this.searchData.name : '',
-            "mobile": this.searchFlag ? this.searchData.mobile : '',
-            "agencyId": this.searchFlag ? this.searchData.agencyId : '',
-            "storageId": this.searchFlag ? this.searchData.storageId : '',
-            "state": this.searchFlag ? this.searchData.state : '',
+            "name": this.pagingData.name,
+            "mobile": this.pagingData.mobile,
+            "agencyId": this.pagingData.agencyId,
+            "storageId": this.pagingData.storageId,
+            "state": this.pagingData.state,
             "current": this.currentPage,
             "size": this.pageSize,
           }).then((response) => {
@@ -380,15 +381,9 @@
         });
       },
       search() {
-        let data = JSON.parse(JSON.stringify(this.searchData));
-        data.current = 1;
-        data.size = this.pageSize;
-        this.$axios.post('baseInfo/user/list', data).then((response) => {
-          this.searchFlag = true;
-          this.currentPage = 1;
-          this.tableData = response.data.data.records;
-          this.total = response.data.data.totalSize;
-        })
+        this.currentPage = 1;
+        this.pagingData = JSON.parse(JSON.stringify(this.searchData));
+        this.init_data();
       },
       accpetSliceData(data) { //接受分页器返回的数据
         this.currentPage = data.currentPage;

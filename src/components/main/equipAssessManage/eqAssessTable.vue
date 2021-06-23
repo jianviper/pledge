@@ -41,7 +41,14 @@
         :visible.sync="drawer"
         size="800px"
         direction="ltr">
-        <EqAssessReport v-for="(item,index) in reportData" :key="index" :table-data="item"/>
+        <div id="top"></div>
+        <el-button id="print" type="primary" v-print="printObj">打印</el-button>
+        <div id="assessReport1" style="margin-bottom: -160px">
+          <EqAssessReport v-for="(item,index) in reportData" :key="index" :table-data="item"/>
+        </div>
+        <span class="goTop" @click="goTo('#top')">
+          <i class="el-icon-caret-top" style="margin-top: 10px"></i>
+        </span>
       </el-drawer>
     </div>
   </div>
@@ -58,6 +65,12 @@
       return {
         drawer: false,
         reportData: [],
+        printObj: {
+          id: 'assessReport1',
+          popTitle: '设备评估报告',
+          extraCss: "https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.compat.css, https://cdn.bootcdn.net/ajax/libs/hover.css/2.3.1/css/hover-min.css",
+          extraHead: '<meta http-equiv="Content-Language"content="zh-cn"/>',
+        }
       }
     },
     methods: {
@@ -66,6 +79,9 @@
         this.$axios.get('carloan/mechanicalEquipment/report/' + rowData.pledgeApplyId).then((response) => {
           this.reportData = response.data.data;
         })
+      },
+      goTo(dst) {
+        document.querySelector(dst).scrollIntoView(true);
       }
     }
   }
@@ -74,5 +90,27 @@
 <style scoped>
   .drawer_wrap >>> .el-drawer__wrapper > div > div > .el-drawer__body {
     overflow: auto;
+  }
+
+  #print {
+    position: absolute;
+    top: 75px;
+    left: 10px;
+  }
+
+  .goTop {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #cccccc;
+    border-radius: 50%;
+    position: absolute;
+    top: 90%;
+    left: 715px;
+    cursor: pointer;
+    color: #409eff;
+  }
+
+  .goTop:hover {
+    background-color: #cae7ff;
   }
 </style>

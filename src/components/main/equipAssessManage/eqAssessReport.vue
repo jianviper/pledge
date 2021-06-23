@@ -1,5 +1,5 @@
 <template>
-  <div style="margin: auto 100px 20px 100px">
+  <div style="margin: auto 100px 200px 100px">
     <table border="1" cellspacing="0" cellpadding="0">
       <tr>
         <td colspan="2" class="title">设备评估报告</td>
@@ -101,9 +101,14 @@
     color: rgb(255, 255, 255);
     height: 50px;
     font-size: 18px;
+    text-align: center;
   }
 
   .cate {
+    text-align: center;
+  }
+
+  td {
     text-align: center;
   }
 

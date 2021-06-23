@@ -9,8 +9,10 @@ import http from './utils/http'
 import store from './vuex/store'
 import 'element-ui/lib/theme-chalk/index.css'
 import * as filters from './utils/filters/formatDate'
+import Print from 'vue-print-nb'
 
 Vue.use(ElementUI);
+Vue.use(Print);
 Vue.config.productionTip = false;
 Vue.prototype.$axios = http;
 Object.keys(filters).forEach(filterName => {

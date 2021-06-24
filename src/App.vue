@@ -21,4 +21,7 @@
     padding: 0px;
   }
 
+  .el-table th.gutter {
+    display: table-cell !important;
+  }
 </style>

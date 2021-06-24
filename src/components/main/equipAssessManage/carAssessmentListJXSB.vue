@@ -47,14 +47,14 @@
     <!--    start-标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="全部" name="pane-0">
-        <EqAssessTable :tableData="allTableData.data" :state="true"/>
+        <EqAssessTable :tableData="allTableData.data" :state="0"/>
         <!--    start-分页器-->
         <Pager :dataList="allTableData.data" :currentPage="currentPage" :totalSize="allTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="待评估" name="pane-1">
-        <EqAssessTable :tableData="assessWaitTableData.data"/>
+        <EqAssessTable :tableData="assessWaitTableData.data" :state="1"/>
         <!--    start-分页器-->
         <Pager :dataList="assessWaitTableData.data" :currentPage="currentPage" :totalSize="assessWaitTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
@@ -68,7 +68,7 @@
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="已完成" name="pane-3">
-        <EqAssessTable :tableData="assessDoneTableData.data" :state="true"/>
+        <EqAssessTable :tableData="assessDoneTableData.data" :state="0"/>
         <!--    start-分页器-->
         <Pager :dataList="assessDoneTableData.data" :currentPage="currentPage" :totalSize="assessDoneTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>

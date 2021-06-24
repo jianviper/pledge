@@ -3,9 +3,9 @@
     <el-table :data="tableData"
               border
               stripe
-              style="width: 100%" :header-cell-style="{'text-align':'center'}"
+              style="width: 1300px" :header-cell-style="{'text-align':'center'}"
               :cell-style="{'text-align':'center'}">
-      <el-table-column prop="businessName" label="公司名称" width="160"></el-table-column>
+      <el-table-column prop="businessName" label="公司名称" width="180"></el-table-column>
       <el-table-column prop="agencyAbbreviation" label="监管仓" width="160"></el-table-column>
       <el-table-column prop="name" label="法定代表人" width="100"></el-table-column>
       <el-table-column prop="mobile" label="联系方式" width="120"></el-table-column>
@@ -25,20 +25,32 @@
           <p v-else-if="scope.row.state===3">已交付</p>
         </template>
       </el-table-column>
-      <el-table-column v-if="state"
+      <el-table-column v-if="state==0"
                        fixed="right"
                        label="操作"
                        width="120">
         <template slot-scope="scope">
-          <el-button @click="assessReport(scope.$index, scope.row)" type="text" size="small">查看评估报告
+          <el-button v-if="scope.row.state==2" @click="assessReport(scope.$index, scope.row)" type="text" size="small">
+            查看评估报告
           </el-button>
+          <el-button v-else-if="scope.row.state==0" @click="assess(scope.$index, scope.row)" type="text" size="small">
+            评估
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column v-else-if="state==1"
+                       fixed="right"
+                       label="操作"
+                       width="100">
+        <template slot-scope="scope">
+          <el-button @click="assess(scope.$index, scope.row)" type="text" size="small">评估</el-button>
         </template>
       </el-table-column>
     </el-table>
     <div class="drawer_wrap">
       <el-drawer
         title="设备评估报告"
-        :visible.sync="drawer"
+        :visible.sync="reportDrawerVisible"
         size="800px"
         direction="ltr">
         <div id="top"></div>
@@ -50,39 +62,108 @@
           <i class="el-icon-caret-top" style="margin-top: 10px"></i>
         </span>
       </el-drawer>
+      <el-drawer
+        title="设备评估"
+        :visible.sync="assessDrawerVisible"
+        size="800px"
+        direction="ltr">
+        <div class="assess_wrap">
+          <el-row>
+            <el-col :span="12">评估完成：{{assessData.assessSuccessNum}}</el-col>
+            <el-col :span="12">待评估：{{assessData.assessWaitNum}}</el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">评估失败：{{assessData.assessFailNum}}</el-col>
+            <el-col :span="12">评估价值：{{assessData.totalAssessPrice}}</el-col>
+          </el-row>
+          <div>
+            <el-button type="primary" round style="margin: 10px auto;float:left;">提交评估任务</el-button>
+          </div>
+          <el-table :data="assessData.mechanicalEquipmentAssessVoList" ref="assessTable"
+                    border
+                    stripe
+                    :header-cell-style="{'text-align':'center'}"
+                    :cell-style="{'text-align':'center'}">
+            <el-table-column label="名称" prop="mechanicalEquipmentName"></el-table-column>
+            <el-table-column label="规格" prop="mechanicalEquipmentSpecifications"></el-table-column>
+            <el-table-column label="评估价值" prop="evaluationValue" width="100"></el-table-column>
+            <el-table-column label="出质人" prop="pledgorName" width="100"></el-table-column>
+            <el-table-column label="状态" prop="state" width="80">
+              <template slot-scope="scope">
+                <p v-if="scope.row.state===0">待评估</p>
+                <p v-else-if="scope.row.state===1">评估失败</p>
+                <p v-else-if="scope.row.state===2">评估完成</p>
+                <p v-else-if="scope.row.state===3">已交付</p>
+              </template>
+            </el-table-column>
+            <el-table-column fixed="right"
+                             label="操作"
+                             width="140">
+              <template slot-scope="scope">
+                <el-button @click="assessConfirm(scope.$index, scope.row)" type="text" size="small">评估确认</el-button>
+                <el-button @click="assessDel(scope.$index, scope.row)" type="text" size="small">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-drawer>
+      <EqAssessConfirmDialog :assessConfirmDiaVisible="assessConDiaVisible" :assessTaskID="assessTaskId" :host="host"/>
     </div>
   </div>
 </template>
 
 <script>
   import EqAssessReport from './eqAssessReport'
+  import EqAssessConfirmDialog from './eqAssessConfirmDialog'
+  import config from '../../../../config'
 
   export default {
     name: "eqAssessTable",
-    components: {EqAssessReport},
+    components: {EqAssessReport, EqAssessConfirmDialog},
     props: ['tableData', 'state'],
     data() {
       return {
-        drawer: false,
+        reportDrawerVisible: false,
+        assessDrawerVisible: false,
         reportData: [],
+        assessData: [],
+        assessTaskId: '',
+        assessConDiaVisible: '',
+        host: '',
         printObj: {
           id: 'assessReport1',
           popTitle: '设备评估报告',
-          extraCss: "https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.compat.css, https://cdn.bootcdn.net/ajax/libs/hover.css/2.3.1/css/hover-min.css",
+          // extraCss: "https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.compat.css, https://cdn.bootcdn.net/ajax/libs/hover.css/2.3.1/css/hover-min.css",
           extraHead: '<meta http-equiv="Content-Language"content="zh-cn"/>',
         }
       }
     },
     methods: {
       assessReport(index, rowData) {
-        this.drawer = true;
+        this.reportDrawerVisible = true;
         this.$axios.get('carloan/mechanicalEquipment/report/' + rowData.pledgeApplyId).then((response) => {
           this.reportData = response.data.data;
         })
       },
+      assess(index, rowData) {
+        this.assessDrawerVisible = true;
+        this.$axios.get('carloan/mechanicalEquipmentAssess/list/' + rowData.pledgeApplyId).then((response) => {
+          this.assessData = response.data.data;
+        })
+      },
+      assessConfirm(index, rowData) {
+        this.assessConDiaVisible = new Date().getTime();
+        this.assessTaskId = rowData.id;
+      },
+      assessDel() {
+
+      },
       goTo(dst) {
         document.querySelector(dst).scrollIntoView(true);
       }
+    },
+    mounted() {
+      this.host = process.env.NODE_ENV == 'test' ? config.test.proxyTable["/api"].target + 'api' : config.dev.proxyTable["/api"].target + 'api';
     }
   }
 </script>
@@ -112,5 +193,14 @@
 
   .goTop:hover {
     background-color: #cae7ff;
+  }
+
+  .assess_wrap {
+    margin: auto 20px;
+  }
+
+  .el-row {
+    text-align: left;
+    margin-top: 10px;
   }
 </style>

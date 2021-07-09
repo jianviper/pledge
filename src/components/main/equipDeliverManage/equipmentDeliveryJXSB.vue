@@ -47,21 +47,21 @@
     <!--    start-标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="全部" name="pane-0">
-        <EqDeliverTable :tableData="allTableData.data" :state="true"/>
+        <EqDeliverTable :tableData="allTableData.data" :state="true" :loading-v="loading"/>
         <!--    start-分页器-->
         <Pager :dataList="allTableData.data" :currentPage="currentPage" :totalSize="allTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="待确认" name="pane-1">
-        <EqDeliverTable :tableData="waitTableData.data"/>
+        <EqDeliverTable :tableData="waitTableData.data" :loading-v="loading"/>
         <!--    start-分页器-->
         <Pager :dataList="waitTableData.data" :currentPage="currentPage" :totalSize="waitTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="已确认" name="pane-2">
-        <EqDeliverTable :tableData="doneTableData.data" :state="true"/>
+        <EqDeliverTable :tableData="doneTableData.data" :state="true" :loading-v="loading"/>
         <!--    start-分页器-->
         <Pager :dataList="doneTableData.data" :currentPage="currentPage" :totalSize="doneTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
@@ -81,6 +81,7 @@
     components: {EqDeliverTable, Pager},
     data() {
       return {
+        loading: false,
         searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
         pagingData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
         activeTab: 'pane-0',
@@ -107,6 +108,7 @@
         console.log(this.pagingData);
         this.pagingData = JSON.parse(JSON.stringify(this.searchData));
         this.currentPage = 1;
+        this.init_data(this.pageSize);
       },
       handleClick(tab) {
         this.currentPage = 1;
@@ -118,6 +120,7 @@
         })
       },
       init_data(pageSize = 20) { //初始化全部表格数据
+        this.loading = true;
         this.allTableData_init(pageSize);
         this.waitTableData_init(pageSize);
         this.doneTableData_init(pageSize);
@@ -134,9 +137,11 @@
           }).then((response) => {
           this.allTableData.data = response.data.data.records;
           this.allTableData.total = response.data.data.totalSize;
+          this.loading = false;
         })
       },
       async waitTableData_init(pageSize = 20) { //初始化待评估列表数据
+        // this.loading = true;
         await this.$axios.post('search/delivery_aggregation/list',
           {
             "businessName": this.pagingData.businessName,
@@ -149,9 +154,11 @@
           }).then((response) => {
           this.waitTableData.data = response.data.data.records;
           this.waitTableData.total = response.data.data.totalSize;
+          this.loading = false;
         })
       },
       async doneTableData_init(pageSize = 20) { //初始化评估完成列表数据
+        // this.loading = true;
         await this.$axios.post('search/delivery_aggregation/list',
           {
             "businessName": this.pagingData.businessName,
@@ -164,6 +171,7 @@
           }).then((response) => {
           this.doneTableData.data = response.data.data.records;
           this.doneTableData.total = response.data.data.totalSize;
+          this.loading = false;
         })
       },
       accpetSliceData(data) {

@@ -47,28 +47,29 @@
     <!--    start-标签页-->
     <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
       <el-tab-pane label="全部" name="pane-0">
-        <EqAssessTable :tableData="allTableData.data" :state="0"/>
+        <EqAssessTable :tableData="allTableData.data" :state="0" :loading="loadingV"/>
         <!--    start-分页器-->
         <Pager :dataList="allTableData.data" :currentPage="currentPage" :totalSize="allTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="待评估" name="pane-1">
-        <EqAssessTable :tableData="assessWaitTableData.data" :state="1"/>
+        <EqAssessTable :tableData="assessWaitTableData.data" :state="1" :loading="loadingV"
+                       @initTableData="accpetInitTableData"/>
         <!--    start-分页器-->
         <Pager :dataList="assessWaitTableData.data" :currentPage="currentPage" :totalSize="assessWaitTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="评估失败" name="pane-2">
-        <EqAssessTable :tableData="assessFailTableData.data"/>
+        <EqAssessTable :tableData="assessFailTableData.data" :loading="loadingV"/>
         <!--    start-分页器-->
         <Pager :dataList="assessFailTableData.data" :currentPage="currentPage" :totalSize="assessFailTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
         <!--    end-分页器-->
       </el-tab-pane>
       <el-tab-pane label="已完成" name="pane-3">
-        <EqAssessTable :tableData="assessDoneTableData.data" :state="0"/>
+        <EqAssessTable :tableData="assessDoneTableData.data" :state="0" :loading="loadingV"/>
         <!--    start-分页器-->
         <Pager :dataList="assessDoneTableData.data" :currentPage="currentPage" :totalSize="assessDoneTableData.total"
                :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
@@ -89,6 +90,7 @@
     components: {EqAssessTable, Pager},
     data() {
       return {
+        loadingV: false,
         searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
         pagingData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
         activeTab: 'pane-0',
@@ -116,7 +118,7 @@
         console.log(this.pagingData);
         this.pagingData = JSON.parse(JSON.stringify(this.searchData));
         this.currentPage = 1;
-        this.init_data(this.pageSize);
+        this.init_TableData(this.pageSize);
       },
       handleClick(tab) {
         // console.log(tab.name, this.activeTab, this.tableDataList);
@@ -128,7 +130,8 @@
           this.storageOptions.splice(0, 0, {agencyAbbreviation: '全部', id: ''});
         })
       },
-      init_data(pageSize = 20) { //初始化全部表格数据
+      init_TableData(pageSize = 20) { //初始化全部表格数据
+        this.loadingV = true;
         this.allTableData_init(pageSize);
         this.assessWaitTableData_init(pageSize);
         this.assessFailTableData_init(pageSize);
@@ -146,6 +149,7 @@
           }).then((response) => {
           this.allTableData.data = response.data.data.records;
           this.allTableData.total = response.data.data.totalSize;
+          this.loadingV = false;
         })
       },
       async assessWaitTableData_init(pageSize = 20) { //初始化待评估列表数据
@@ -161,6 +165,7 @@
           }).then((response) => {
           this.assessWaitTableData.data = response.data.data.records;
           this.assessWaitTableData.total = response.data.data.totalSize;
+          this.loadingV = false;
         })
       },
       async assessFailTableData_init(pageSize = 20) { //初始化评估失败列表数据
@@ -176,6 +181,7 @@
           }).then((response) => {
           this.assessFailTableData.data = response.data.data.records;
           this.assessFailTableData.total = response.data.data.totalSize;
+          this.loadingV = false;
         })
       },
       async assessDoneTableData_init(pageSize = 20) { //初始化评估完成列表数据
@@ -191,17 +197,21 @@
           }).then((response) => {
           this.assessDoneTableData.data = response.data.data.records;
           this.assessDoneTableData.total = response.data.data.totalSize;
+          this.loadingV = false;
         })
       },
       accpetSliceData(data) {
         this.currentPage = data.currentPage;
         this.pageSize = data.pageSize;
-        this.init_data(this.pageSize);
+        this.init_TableData(this.pageSize);
+      },
+      accpetInitTableData() {
+        this.init_TableData(this.pageSize);
       },
     },
     mounted() {
       this.storage_init();
-      this.init_data();
+      this.init_TableData();
     }
   }
 </script>

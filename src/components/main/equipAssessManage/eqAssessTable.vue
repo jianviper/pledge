@@ -1,8 +1,7 @@
 <template>
   <div>
-    <el-table :data="tableData"
-              border
-              stripe
+    <el-table :data="tableData" v-loading="loading"
+              border stripe
               style="width: 1300px" :header-cell-style="{'text-align':'center'}"
               :cell-style="{'text-align':'center'}">
       <el-table-column prop="businessName" label="公司名称" width="180"></el-table-column>
@@ -77,11 +76,12 @@
             <el-col :span="12">评估价值：{{assessData.totalAssessPrice}}</el-col>
           </el-row>
           <div>
-            <el-button type="primary" round style="margin: 10px auto;float:left;">提交评估任务</el-button>
+            <el-button type="primary" round style="margin: 10px auto;float:left;" @click="assessSubmit">提交评估任务
+            </el-button>
           </div>
           <el-table :data="assessData.mechanicalEquipmentAssessVoList" ref="assessTable"
-                    border
-                    stripe
+                    border stripe
+                    v-loading="drawerTableLoading"
                     :header-cell-style="{'text-align':'center'}"
                     :cell-style="{'text-align':'center'}">
             <el-table-column label="名称" prop="mechanicalEquipmentName"></el-table-column>
@@ -100,14 +100,19 @@
                              label="操作"
                              width="140">
               <template slot-scope="scope">
-                <el-button @click="assessConfirm(scope.$index, scope.row)" type="text" size="small">评估确认</el-button>
-                <el-button @click="assessDel(scope.$index, scope.row)" type="text" size="small">删除</el-button>
+                <el-button v-if="scope.row.state==0" @click="assessConfirm(scope.$index, scope.row)" type="text"
+                           size="small">评估确认
+                </el-button>
+                <el-button v-if="scope.row.state==0" @click="assessDel(scope.$index, scope.row)" type="text"
+                           size="small">删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
         </div>
       </el-drawer>
-      <EqAssessConfirmDialog :assessConfirmDiaVisible="assessConDiaVisible" :assessTaskID="assessTaskId" :host="host"/>
+      <EqAssessConfirmDialog :assessConfirmDiaVisible="assessConDiaVisible" :assessTaskID="assessTaskId"
+                             :pledgeApplyID="pledgeApplyId" :host="host"/>
     </div>
   </div>
 </template>
@@ -120,14 +125,16 @@
   export default {
     name: "eqAssessTable",
     components: {EqAssessReport, EqAssessConfirmDialog},
-    props: ['tableData', 'state'],
+    props: ['tableData', 'state', 'loading'],
     data() {
       return {
+        drawerTableLoading: false,
         reportDrawerVisible: false,
         assessDrawerVisible: false,
         reportData: [],
         assessData: [],
         assessTaskId: '',
+        pledgeApplyId: '',
         assessConDiaVisible: '',
         host: '',
         printObj: {
@@ -147,18 +154,72 @@
       },
       assess(index, rowData) {
         this.assessDrawerVisible = true;
+        this.pledgeApplyId = JSON.parse(JSON.stringify(rowData)).pledgeApplyId;
+        this.drawerTableLoading = true;
         this.$axios.get('carloan/mechanicalEquipmentAssess/list/' + rowData.pledgeApplyId).then((response) => {
           this.assessData = response.data.data;
-        })
+          this.drawerTableLoading = false;
+        });
       },
       assessConfirm(index, rowData) {
         this.assessConDiaVisible = new Date().getTime();
         this.assessTaskId = rowData.id;
       },
-      assessDel() {
+      assessSubmit() { //评估提交
+        let flag = true;
+        this.assessData.mechanicalEquipmentAssessVoList.map((item) => {
+          if (item.state == 0) {
+            flag = false;
+          }
+        });
+        if (flag) {
+          this.$axios.post('carloan/mechanicalEquipmentAssess/submit', {'pledgeApplyId': this.pledgeApplyId}).then((response) => {
+            if (response.data.code === 200) {
+              this.$message({
+                message: '提交成功',
+                type: 'success'
+              });
+              this.assessDrawerVisible = false;
+              this.$emit('initTableData'); //让父组件刷新表格数据
+            }
+          })
+        } else {
+          this.$message({
+            message: '还有未评估的设备',
+            type: 'warning'
+          });
+        }
 
       },
-      goTo(dst) {
+      assessDel(index, rowData) {
+        console.log(rowData);
+        this.$confirm('是否删除此设备?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$axios.delete('carloan/mechanicalEquipmentAssess/delete/' + rowData.id).then((response) => {
+            if (response.data.code === 200) {
+              this.$message({
+                message: '删除成功',
+                type: 'success'
+              });
+              this.assessData_init();
+            } else {
+              this.$message({
+                message: response.data.message,
+                type: 'error'
+              });
+            }
+          })
+        })
+      },
+      assessData_init() { //某设备提交评估后刷新表格数据
+        this.$axios.get('carloan/mechanicalEquipmentAssess/list/' + this.pledgeApplyId).then((response) => {
+          this.assessData = response.data.data;
+        })
+      },
+      goTo(dst) { //回到顶部
         document.querySelector(dst).scrollIntoView(true);
       }
     },

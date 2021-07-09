@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table :data="tableData"
+    <el-table :data="tableData" v-loading="loadingV"
               border
               stripe
               style="width: 100%" :header-cell-style="{'text-align':'center'}"
@@ -75,7 +75,7 @@
 <script>
   export default {
     name: "eqDeliverTable",
-    props: ['tableData', 'state'],
+    props: ['tableData', 'state','loadingV'],
     data() {
       return {
         drawer: false,

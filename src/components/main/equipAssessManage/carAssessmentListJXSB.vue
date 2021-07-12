@@ -147,7 +147,7 @@
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {
-          this.allTableData.data = response.data.data.records;
+          this.allTableData.data = response.data.data.records.slice(0, this.pageSize);
           this.allTableData.total = response.data.data.totalSize;
           this.loadingV = false;
         })
@@ -163,7 +163,7 @@
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {
-          this.assessWaitTableData.data = response.data.data.records;
+          this.assessWaitTableData.data = response.data.data.records.slice(0, this.pageSize);
           this.assessWaitTableData.total = response.data.data.totalSize;
           this.loadingV = false;
         })
@@ -179,7 +179,7 @@
             "current": this.currentPage,
             "size": pageSize,
           }).then((response) => {
-          this.assessFailTableData.data = response.data.data.records;
+          this.assessFailTableData.data = response.data.data.records.slice(0, this.pageSize);
           this.assessFailTableData.total = response.data.data.totalSize;
           this.loadingV = false;
         })

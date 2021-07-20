@@ -30,7 +30,7 @@
           <el-button v-if="scope.row.state==2" @click="priceConfirmView(scope.$index, scope.row)" type="text"
                      size="small">查看确认价格
           </el-button>
-          <el-button v-if="scope.row.state==0" @click="priceConfirm(scope.$index, scope.row)" type="text"
+          <el-button v-if="scope.row.state==0" @click="priceConfirmView(scope.$index, scope.row)" type="text"
                      size="small">价格确认
           </el-button>
         </template>
@@ -41,7 +41,7 @@
       :visible.sync="drawer"
       size="800px"
       direction="ltr">
-      <div class="content_wrap">
+      <div class="content_wrap" v-loading="drawerLoad">
         <p style="text-align: left">{{rowdata.businessName}}</p>
         <el-row>
           <el-col :span="12"><span class="text">确认成功：</span>{{mechanicsData.alreadyConfirmNum}}</el-col>
@@ -51,6 +51,7 @@
           <el-col :span="12"><span class="text">确认放款总价值：</span>{{mechanicsData.totalLoanValue}}</el-col>
           <el-col :span="12"><span class="text">确认放款总金额：</span>{{mechanicsData.totalLoanAmount}}</el-col>
         </el-row>
+        <el-button v-if="rowdata.state==0" type="primary" round style="float: left;margin:10px auto">提交价值确认</el-button>
         <el-table :data="mechanicsData.managementAssessVoList"
                   border
                   stripe
@@ -73,9 +74,42 @@
           <el-table-column label="回购方估值" prop="mechanicalEvaluationValue"></el-table-column>
           <el-table-column label="放款价值" prop="loanValue"></el-table-column>
           <el-table-column label="放款金额" prop="loanAmount"></el-table-column>
+          <el-table-column fixed="right"
+                           label="操作"
+                           width="120">
+            <template slot-scope="scope">
+              <el-button v-if="scope.row.state==0" @click="priceConfirm(scope.$index, scope.row)" type="text"
+                         size="small">价格确认
+              </el-button>
+              <el-button v-if="scope.row.state==2" @click="priceConfirm(scope.$index, scope.row)" type="text"
+                         size="small">重新确认
+              </el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </el-drawer>
+    <el-dialog title="确认价格" :visible.sync="dialogVisible" class="confirmDia" width="600px">
+      <el-row>
+        <span>评估价值：</span>
+      </el-row>
+      <el-row style="margin-top: 20px;">
+        <span>回购价值：</span>
+      </el-row>
+      <el-row>
+        <el-form :model="confirmData">
+          <el-form-item label="放款价值：" prop="loanValue">
+            <el-input v-model="loanValue" style="width: 300px"></el-input>
+          </el-form-item>
+        </el-form>
+      </el-row>
+      <div>
+        <span class="dialog-footer">
+            <el-button @click="cancel()">取 消</el-button>
+            <el-button type="primary" @click="add_submit">确 定</el-button>
+        </span>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -85,22 +119,32 @@
     props: ['tableData', 'state', 'loadingV'],
     data() {
       return {
+        dialogVisible: false,
         drawer: false,
+        drawerLoad: false,
         mechanicsData: [],
         rowdata: {},
+        confirmData: {},
       }
     },
     methods: {
       priceConfirmView(index, rowData) {
+        console.log(rowData);
         this.drawer = true;
+        this.drawerLoad = true;
         this.rowdata = JSON.parse(JSON.stringify(rowData));
         this.$axios.get('carloan/management_assess/mechanicsList/' + rowData.pledgeApplyId).then((response) => {
           this.mechanicsData = response.data.data;
+          this.drawerLoad = false;
         })
       },
       priceConfirm(index, rowData) {
         console.log(rowData);
+        this.dialogVisible = true;
       },
+      add_submit() {
+        console.log(this.confirmData);
+      }
     }
   }
 </script>
@@ -116,5 +160,10 @@
 
   .content_wrap {
     margin: auto 20px;
+  }
+
+  .confirmDia .el-row {
+    text-align: left;
+    margin: 10px 20px;
   }
 </style>

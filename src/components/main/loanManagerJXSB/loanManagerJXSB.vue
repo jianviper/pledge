@@ -1,0 +1,199 @@
+<template>
+  <div>
+    <!--    start-搜索-->
+    <el-row>
+      <el-col :span="8">
+        <el-col :span="8"><label for="businessName">公司</label></el-col>
+        <el-col :span="16">
+          <el-input id="businessName" placeholder="请输入公司名称" v-model="searchData.businessName">
+            <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
+          </el-input>
+        </el-col>
+      </el-col>
+      <el-col :span="8">
+        <el-col :span="8"><label for="mobile">手机</label></el-col>
+        <el-col :span="16">
+          <el-input id="mobile" placeholder="请输入手机号" v-model="searchData.mobile">
+            <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
+          </el-input>
+        </el-col>
+      </el-col>
+      <el-col :span="7">
+        <el-col :span="8"><label for="idCardNo">身份证</label></el-col>
+        <el-col :span="16">
+          <el-input id="idCardNo" placeholder="请输入身份证号码" v-model="searchData.idCardNo">
+            <i class="el-icon-close del" slot="suffix" @click="iconClick"></i>
+          </el-input>
+        </el-col>
+      </el-col>
+    </el-row>
+    <el-row style="margin-top:20px">
+      <el-col :span="8">
+        <el-col :span="8"><label for="">监管仓</label></el-col>
+        <el-col :span="16">
+          <el-select v-model="searchData.warehouseId" style="float: left">
+            <el-option v-for="option in storageOptions"
+                       :key="option.id"
+                       :label="option.agencyAbbreviation"
+                       :value="option.id"></el-option>
+          </el-select>
+        </el-col>
+      </el-col>
+      <el-col :span="8">
+        <el-button icon="el-icon-search" type="primary" @click="search">查询</el-button>
+      </el-col>
+    </el-row>
+    <!--    end-搜索-->
+    <!--    start-标签页-->
+    <el-tabs v-model="activeTab" @tab-click="handleClick" style="margin: 20px;">
+      <el-tab-pane label="待放款" name="pane-0">
+        <loanManagementTable :tableData="waitTableData.data" :state="0" :loading-v="loading"/>
+        <!--    start-分页器-->
+        <Pager :dataList="waitTableData.data" :currentPage="currentPage" :totalSize="waitTableData.total"
+               :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
+        <!--    end-分页器-->
+      </el-tab-pane>
+      <el-tab-pane label="贷款管理" name="pane-1">
+        <loanManagementTable :tableData="loanDoneTableData.data" :state="1" :loading-v="loading"/>
+        <!--    start-分页器-->
+        <Pager :dataList="loanDoneTableData.data" :currentPage="currentPage" :totalSize="loanDoneTableData.total"
+               :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
+        <!--    end-分页器-->
+      </el-tab-pane>
+      <el-tab-pane label="已还款" name="pane-2">
+        <loanManagementTable :tableData="repayTableData.data" :state="2" :loading-v="loading"/>
+        <!--    start-分页器-->
+        <Pager :dataList="repayTableData.data" :currentPage="currentPage" :totalSize="repayTableData.total"
+               :page_size="pageSize" class="pager" @returnsliceData="accpetSliceData"></Pager>
+        <!--    end-分页器-->
+      </el-tab-pane>
+    </el-tabs>
+    <!--    end-标签页-->
+  </div>
+</template>
+
+<script>
+  import Pager from '../../parts/Pager'
+  import loanManagementTable from './loanManagementTable'
+
+  export default {
+    name: "loanManagerJXSB",
+    components: {Pager, loanManagementTable},
+    data() {
+      return {
+        loading: false,
+        searchData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
+        pagingData: {businessName: '', mobile: '', idCardNo: '', warehouseId: ''},
+        storageOptions: [],
+        waitTableData: {data: [], total: ''},
+        loanDoneTableData: {data: [], total: ''},
+        repayTableData: {data: [], total: ''},
+        activeTab: 'pane-0',
+        currentPage: 1,
+        pageSize: 10,
+      }
+    },
+    methods: {
+      iconClick(ev) { //点击输入框右侧 x 按钮清空输入框
+        let ele_id = ev.path[3].getElementsByTagName('input')[0].id;
+        if (ele_id === 'businessName') {
+          this.searchData.businessName = '';
+        } else if (ele_id === 'mobile') {
+          this.searchData.mobile = '';
+        } else if (ele_id === 'idCardNo') {
+          this.searchData.idCardNo = '';
+        }
+      },
+      search() {
+        this.pagingData = JSON.parse(JSON.stringify(this.searchData));
+        this.currentPage = 1;
+        this.init_data(this.pageSize);
+      },
+      handleClick(tab) {
+        this.currentPage = 1;
+      },
+      storage_init() {
+        this.$axios.post('baseInfo/agency/storageList', {"current": 1, "size": 100}).then((response) => {
+          this.storageOptions = JSON.parse(JSON.stringify(response.data.data.records));
+          this.storageOptions.splice(0, 0, {agencyAbbreviation: '全部', id: ''});
+        })
+      },
+      init_data(pageSize = 20) { //初始化全部表格数据
+        this.loading = true;
+        this.waitTableData_init(pageSize);
+        this.loanDoneTableData_init(pageSize);
+        this.repayTableData_init(pageSize);
+      },
+      async waitTableData_init(pageSize = 20) { //初始化待评估列表数据
+        // this.loading = true;
+        await this.$axios.post('search/wait_make_loan/list',
+          {
+            "businessName": this.pagingData.businessName,
+            "mobile": this.pagingData.mobile,
+            "idCardNo": this.pagingData.idCardNo,
+            "warehouseId": this.pagingData.warehouseId,
+            "current": this.currentPage,
+            "size": pageSize,
+          }).then((response) => {
+          this.waitTableData.data = response.data.data.records.slice(0, this.pageSize);
+          this.waitTableData.total = response.data.data.totalSize;
+          this.loading = false;
+        })
+      },
+      async loanDoneTableData_init(pageSize = 20) { //初始化全部数据列表
+        await this.$axios.post('search/loan_management/list',
+          {
+            "businessName": this.pagingData.businessName,
+            "mobile": this.pagingData.mobile,
+            "idCardNo": this.pagingData.idCardNo,
+            "warehouseId": this.pagingData.warehouseId,
+            "current": this.currentPage,
+            "size": pageSize,
+          }).then((response) => {
+          this.loanDoneTableData.data = response.data.data.records.slice(0, this.pageSize);
+          this.loanDoneTableData.total = response.data.data.totalSize;
+          this.loading = false;
+        })
+      },
+      async repayTableData_init(pageSize = 20) { //初始化评估完成列表数据
+        // this.loading = true;
+        await this.$axios.post('search/repayment_aggregation/list',
+          {
+            "businessName": this.pagingData.businessName,
+            "mobile": this.pagingData.mobile,
+            "idCardNo": this.pagingData.idCardNo,
+            "warehouseId": this.pagingData.warehouseId,
+            "current": this.currentPage,
+            "size": pageSize,
+          }).then((response) => {
+          this.repayTableData.data = response.data.data.records.slice(0, this.pageSize);
+          this.repayTableData.total = response.data.data.totalSize;
+          this.loading = false;
+        })
+      },
+      accpetSliceData(data) {
+        this.currentPage = data.currentPage;
+        this.pageSize = data.pageSize;
+        this.init_data(this.pageSize);
+      },
+    },
+    mounted() {
+      this.storage_init();
+      this.init_data();
+    }
+  }
+</script>
+
+<style scoped>
+  label {
+    line-height: 40px;
+  }
+
+  .del {
+    line-height: 40px;
+  }
+
+  .pager {
+    margin-top: 20px;
+  }
+</style>

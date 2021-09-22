@@ -31,6 +31,10 @@
       handleOpen(key, keyPath) {
         console.log(key.$el.innerHTML.trim(), keyPath);
       },
+      /**
+       * 点击左侧二级菜单
+       * @param key
+       */
       addTab(key) {
         // console.log(key.index, key.$el.innerHTML.trim());
         this.$store.commit('addTab', {title: key.$el.innerHTML.trim(), ref: '/mainf/' + key.index});

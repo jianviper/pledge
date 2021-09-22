@@ -127,7 +127,7 @@
             this.supervisor_options.push({value: item.id, label: item.agencyAbbreviation});
           })
         })
-        console.log(this.supervisor_options);
+        // console.log(this.supervisor_options);
       }
     },
     mounted() {

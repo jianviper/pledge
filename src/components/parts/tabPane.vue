@@ -9,7 +9,7 @@
       <!--            <component :is="item.ref"></component>-->
       <!--            加载子组件-->
       <keep-alive>
-        <router-view></router-view>
+        <router-view v-if="item.ref==activeIndex"></router-view>
       </keep-alive>
     </el-tab-pane>
   </el-tabs>
@@ -28,7 +28,7 @@
         * thisTab:当前选中的tabs的实例
         * 通过当前选中tabs的实例获得当前实例的path 重新定位路由
         * */
-        let val = this.tabsItem.filter(item => thisTab.name == item.ref);
+        // let val = this.tabsItem.filter(item => thisTab.name == item.ref);
         if (thisTab.label == '首页') {
           sessionStorage.removeItem('currentTab');
         } else {

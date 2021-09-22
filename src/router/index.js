@@ -14,6 +14,7 @@ let arr = [];
 router.keys().forEach((key) => {
   arr = arr.concat(router(key).default); // 拼接数组
 });
+// console.log('index.router');
 arr.push(
   {
     path: 'wel',
